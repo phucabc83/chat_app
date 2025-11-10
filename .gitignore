@@ -1,0 +1,152 @@
+# ===============================
+# General
+# ===============================
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+Thumbs.db
+
+# ===============================
+# IDEs
+# ===============================
+# Android Studio / IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VSCode (giữ lại nếu bạn có launch.json cần thiết)
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+DerivedData/
+
+# ===============================
+# Flutter / Dart / Pub
+# ===============================
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+doc/api/
+ios/Flutter/.last_build_id
+
+# Generated files
+*.g.dart
+*.freezed.dart
+
+# ===============================
+# Android
+# ===============================
+# Gradle
+.gradle/
+**/gradle-wrapper.jar
+gradlew
+gradlew.bat
+/local.properties
+
+# Android Studio Build Output
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+**/android/.cxx/
+**/android/build/
+
+# ===============================
+# iOS
+# ===============================
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework/
+ios/Flutter/Flutter.podspec
+ios/Flutter/App.framework
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/build/
+ios/.generated/
+
+# CocoaPods
+*.xcworkspace
+Podfile.lock
+
+# ===============================
+# Web
+# ===============================
+# If you use web builds
+web/.dart_tool/
+web/build/
+
+# ===============================
+# macOS / Windows / Linux
+# ===============================
+macos/Flutter/ephemeral/
+macos/build/
+linux/build/
+windows/build/
+
+# ===============================
+# Firebase / Secrets
+# ===============================
+google-services.json
+GoogleService-Info.plist
+firebase_app_id_file.json
+*.keystore
+*.jks
+*.pem
+*.p12
+*.key
+*.crt
+*.der
+*.cer
+*.env
+
+# ===============================
+# Symbolication / Obfuscation
+# ===============================
+app.*.symbols
+app.*.map.json
+
+# ===============================
+# Misc
+# ===============================
+*.lock
+*.bak
+*.tmp
+*.orig
+*.rej
+*.swo
+*.swp
+
+# ===============================
+# Optional
+# ===============================
+# Nếu bạn dùng test snapshots
+test/**/goldens/
+
+# Nếu bạn dùng Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
+
+# Nếu bạn dùng Firebase Crashlytics
+crashlytics-build.properties

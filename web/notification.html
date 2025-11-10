@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Notification</title>
+    <style>
+        body {
+          margin: 0;
+          font-family: "Segoe UI", Roboto, Arial, sans-serif;
+          background: transparent;
+        }
+
+        .popup {
+          width: 300px;
+          min-height: 100px;
+          padding: 16px;
+          border-radius: 12px;
+          background: #ffffff;
+          box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          animation: slideUp 0.4s ease-out;
+        }
+
+        .popup-header {
+          display: flex;
+          align-items: center;
+          margin-bottom: 12px;
+        }
+
+        .popup-header img {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          margin-right: 10px;
+        }
+
+        .popup-header h4 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: bold;
+          color: #333;
+        }
+
+        .popup-body {
+          font-size: 14px;
+          color: #555;
+        }
+
+        .popup-close {
+          position: absolute;
+          top: 8px;
+          right: 12px;
+          cursor: pointer;
+          font-size: 18px;
+          color: #888;
+        }
+
+        .popup-close:hover {
+          color: #000;
+        }
+
+        @keyframes slideUp {
+          from { transform: translateY(50px); opacity: 0; }
+          to   { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+<div class="popup">
+    <div class="popup-close" onclick="window.close()">×</div>
+    <div class="popup-header">
+        <img src="https://api.dicebear.com/7.x/bottts/png?seed=Avatar10&size=80" alt="Avatar">
+        <h4>Tài</h4>
+    </div>
+    <div class="popup-body">
+        Bạn có tin nhắn mới: <b>“Nghe k?”</b>
+    </div>
+</div>
+</body>
+</html>
