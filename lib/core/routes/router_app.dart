@@ -31,10 +31,7 @@ class RouterApp {
       GoRoute(
         path: AppRouteInfor.homePath,
         name: AppRouteInfor.homeName,
-        builder: (_, _) => BlocProvider<InComingCallCubit>(
-          create: (context) => sl<InComingCallCubit>(),
-          child: HomeMainPage(),
-        ),
+        builder: (_, _) => HomeMainPage(),
       ),
       GoRoute(
         path: AppRouteInfor.chatPath,
@@ -116,20 +113,20 @@ class RouterApp {
         path: AppRouteInfor.videoCallPath,
         name: AppRouteInfor.videoCallName,
 
-        builder: (context, router) {
-          final callID = router.pathParameters['id']!;
-          final userID = router.uri.queryParameters['userID']!;
-          final userName = router.uri.queryParameters['userName']!;
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
 
-          print('id $callID name $userName userID $userID');
+          final callID = extra['callID']!;
+          final userIDReceiver = extra['userIDReceiver']!;
+          final userIDCaller = extra['userIDCaller']!;
 
-          return BlocProvider(
-            create: (context) => sl<ChatBloc>(),
-            child: VideoCallPage(
-              callID: callID,
-              userID: userID,
-              userName: userName,
-            ),
+
+          print('id $callID userIDReceiver $userIDReceiver userIDCaller $userIDCaller');
+
+          return VideoCallPage(
+            callID: callID,
+            userIDReceiver: userIDReceiver,
+            userIDCaller: userIDCaller,
           );
         },
       ),

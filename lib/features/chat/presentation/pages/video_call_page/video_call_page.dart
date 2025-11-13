@@ -1,3 +1,4 @@
+import 'package:chat_app/core/utils/util.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -5,14 +6,15 @@ import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
 class VideoCallPage extends StatelessWidget {
   final String callID;
-  final String userID;
-  final String userName;
+  final int userIDCaller;
+  final int userIDReceiver;
+
 
   const VideoCallPage({
     super.key,
     required this.callID,
-    required this.userID,
-    required this.userName,
+    required this.userIDCaller,
+    required this.userIDReceiver,
   });
 
   @override
@@ -43,14 +45,16 @@ class VideoCallPage extends StatelessWidget {
 
     }
 
+
+
     return Scaffold(
       body: SafeArea(
         child: ZegoUIKitPrebuiltCall(
           appID: appID,
           appSign: appSign,
           callID: callID,
-          userID: userID,
-          userName: userName,
+          userID:Util.userId.toString(),
+          userName: Util.userName,
           config: baseConfig,
         ),
       ),

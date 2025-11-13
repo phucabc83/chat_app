@@ -1,5 +1,9 @@
+import 'package:chat_app/core/routes/router_app_name.dart';
+import 'package:chat_app/core/utils/util.dart';
+import 'package:chat_app/features/auth/domain/entities/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../blocs/out_going_call_cubit.dart';
 
@@ -26,7 +30,6 @@ class OutGoingCallScreen extends StatefulWidget {
 class _OutGoingCallScreenState extends State<OutGoingCallScreen> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     context.read<OutGoingCallCubit>().makeCall(widget.callID, widget.userIdReceiver);
   }
@@ -36,11 +39,20 @@ class _OutGoingCallScreenState extends State<OutGoingCallScreen> {
     return BlocListener<OutGoingCallCubit,OutGoingCallState>(
 
       listener: (BuildContext context, state) {
-      if(state.status == OutGoingCallStatus.cancel){
+        debugPrint("✅ state outgoing ${state.status}");
+
+        if(state.status == OutGoingCallStatus.cancel){
         Navigator.of(context).pop();
       }
       if(state.status ==OutGoingCallStatus.success){
-
+          context.pushReplacement(
+            AppRouteInfor.videoCallPath,
+            extra: {
+              'callID': widget.callID,
+              'userIDReceiver': widget.userIdReceiver,
+              'userIDCaller': Util.userId,
+            },
+          );
       }
 
       },
@@ -106,9 +118,7 @@ class _OutGoingCallScreenState extends State<OutGoingCallScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(32.0),
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
+                    onPressed: _cancelCall,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.all(20),
                       backgroundColor: Colors.red, // Màu nền đỏ
@@ -123,5 +133,9 @@ class _OutGoingCallScreenState extends State<OutGoingCallScreen> {
       ),
     );
 
+  }
+
+  void _cancelCall() {
+    context.read<OutGoingCallCubit>().cancelCall(widget.callID, widget.userIdReceiver);
   }
 }

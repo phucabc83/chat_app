@@ -359,7 +359,7 @@ class ChatPage extends StatefulWidget {
     }
 
   void navigateToVideoCallPage({required String callID, required String userIdReceiver, required String userName}) {
-      debugPrint('infor navigate to video call page: callID=$callID, userID=$userIdReceiver, userName=$userName');
+      debugPrint('infor navigate to outGoingCallName page: callID=$callID, userID=$userIdReceiver, userName=$userName');
       context.pushNamed(
         AppRouteInfor.outGoingCallName,
         pathParameters: {

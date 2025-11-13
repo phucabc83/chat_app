@@ -12,6 +12,7 @@ class InComingCallCubit extends Cubit<InComingCallState> {
   void init() {
     socketService.listenCallReceived(_receiveCall);
   }
+
   void ringingCall({
     required String usernameCaller,
     required String avatarUrlCaller,
@@ -37,16 +38,16 @@ class InComingCallCubit extends Cubit<InComingCallState> {
         status: InComingCallStatus.accepted,
       )
       );
+      socketService.acceptCall(state.callID!,state.callerID!);
+
     }
 
   }
 
   void declineCall() {
    if(state.status == InComingCallStatus.ringing){
-     emit(state.copyWith(
-       status: InComingCallStatus.declined,
-     )
-     );
+     emit(state.copyWith(status: InComingCallStatus.declined));
+     socketService.rejectCall(state.callID!,state.callerID!);
    }
   }
 
@@ -67,6 +68,10 @@ class InComingCallCubit extends Cubit<InComingCallState> {
       callerID: data['fromUserID'],
       callID: data['callID'],
       reminderTime: data['reminderTime'],
+    );
+
+    socketService.listenCancelCall(
+      () => missedCall(),
     );
   }
 }

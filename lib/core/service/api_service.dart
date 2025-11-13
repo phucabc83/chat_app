@@ -18,10 +18,9 @@ class ApiService {
 
   ApiService() {
     dio = Dio(BaseOptions(
-      baseUrl: Util.apiBaseUrl(),
-      // ví dụ: http://localhost:6000
-      // connectTimeout: const Duration(seconds: 10),
-      // receiveTimeout: const Duration(seconds: 15),
+      baseUrl:  Util.apiBaseUrl(),
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 15),
       headers: {'Content-Type': 'application/json'},
       responseType: ResponseType.json,
     ));

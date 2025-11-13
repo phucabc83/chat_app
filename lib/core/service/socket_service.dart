@@ -12,7 +12,8 @@ typedef ReceiveMessageFun = void Function(Message);
 typedef GetOnlineFriends = void Function(User, bool);
 typedef GetListOnlineFriends = void Function(List<User>);
 
-typedef OnReceiptUpdate = void Function({
+typedef OnReceiptUpdate =
+void Function({
 required int messageId,
 required int userId,
 required String type, // 'delivered' | 'read'
@@ -22,7 +23,9 @@ int? conversationId,
 
 class SocketService {
   static final SocketService _instance = SocketService._internal();
+
   factory SocketService() => _instance;
+
   SocketService._internal();
 
   late IO.Socket socket;
@@ -154,7 +157,7 @@ class SocketService {
         'isGroup': isGroup,
         'fileNameImage': fileNameImage,
         'bytesImage': bytesImage,
-        'mimeType':mimeType
+        'mimeType': mimeType,
       },
       ack: (resp) {
         print('📤 [Socket] Message sent ack: $resp');
@@ -185,8 +188,11 @@ class SocketService {
   /// ==========================
   /// NHẬN TIN Ở MÀN ĐANG MỞ CHAT
   /// ==========================
-  void receiveMessageByPrivateOrGroup(ReceiveMessageFun onReceive, bool isGroup) {
-    final eventName = isGroup ? 'receiveMessage_group' : 'receiveMessage_private';
+  void receiveMessageByPrivateOrGroup(ReceiveMessageFun onReceive,
+      bool isGroup,) {
+    final eventName = isGroup
+        ? 'receiveMessage_group'
+        : 'receiveMessage_private';
 
     // đảm bảo không nhân bản listener
     socket.off(eventName);
@@ -209,7 +215,9 @@ class SocketService {
   }
 
   void offReceiveMessage(bool isGroup) {
-    final eventName = isGroup ? 'receiveMessage_group' : 'receiveMessage_private';
+    final eventName = isGroup
+        ? 'receiveMessage_group'
+        : 'receiveMessage_private';
     socket.off(eventName);
   }
 
@@ -217,7 +225,9 @@ class SocketService {
   /// NHẬN TIN Ở MÀN DANH SÁCH CONVERSATION
   /// ==========================
   void conversationReceiveMessage(ReceiveMessageFun onReceive, bool isGroup) {
-    final eventName = isGroup ? 'conversationUpdated_group' : 'conversationUpdated_private';
+    final eventName = isGroup
+        ? 'conversationUpdated_group'
+        : 'conversationUpdated_private';
 
     // tránh đăng ký trùng
     socket.off(eventName);
@@ -251,12 +261,14 @@ class SocketService {
     required int userId,
     required int maxMessageId,
   }) {
-    debugPrint('[Socket] Marking messages up to $maxMessageId as read in conversation $conversationId by user $userId');
+    debugPrint(
+      '[Socket] Marking messages up to $maxMessageId as read in conversation $conversationId by user $userId',
+    );
     if (!socket.connected) return;
     socket.emit('message:read', {
       'conversationId': conversationId,
       'userId': userId,
-      'maxMessageId': maxMessageId
+      'maxMessageId': maxMessageId,
     });
   }
 
@@ -280,7 +292,8 @@ class SocketService {
       onUpdate(
         messageId: -1,
         userId: data['userId'],
-        type: data['type'], // 'read'
+        type: data['type'],
+        // 'read'
         conversationId: data['conversationId'],
         upTo: data['upTo'],
       );
@@ -288,6 +301,7 @@ class SocketService {
   }
 
   void offDeliveredMessage() => socket.off('message:receipt_update');
+
   void offReadedMessage() => socket.off('message:receipt_update_range');
 
   /// ==========================
@@ -314,10 +328,7 @@ class SocketService {
 
       if (items.isEmpty) return;
 
-      socket.emit('bulkDelivered', {
-        'userId': Util.userId,
-        'messages': items,
-      });
+      socket.emit('bulkDelivered', {'userId': Util.userId, 'messages': items});
 
       // Không cần gọi onMessageDelivered lẻ;
       // server sẽ tự broadcast 'message:receipt_update' cho từng item.
@@ -368,6 +379,7 @@ class SocketService {
   }
 
   void offListFriendsOnline() => socket.off('listFriendsOnline');
+
   void offOnlineFriends() {
     socket.off('friendOnline');
     socket.off('friendOffline');
@@ -384,16 +396,13 @@ class SocketService {
   }
 
   void makeCall(String callID, int userIdReceiver) {
-    socket.emit(
-      'makeCall',
-        {
-          'callID': callID,
-          'fromUserID': Util.userId,
-          'toUserID': userIdReceiver,
-          'fromUserName': Util.userName,
-          'fromAvatarUrl': Util.avatarUrl,
-        }
-    );
+    socket.emit('makeCall', {
+      'callID': callID,
+      'fromUserID': Util.userId,
+      'toUserID': userIdReceiver,
+      'fromUserName': Util.userName,
+      'fromAvatarUrl': Util.avatarUrl,
+    });
   }
 
   void listenCallReceived(Function(Map<String, dynamic>) onCallReceived) {
@@ -403,8 +412,57 @@ class SocketService {
 
       onCallReceived(data);
     });
-
   }
 
+  void listenCallAccepted(Function(Map<String, dynamic>) onCallAccepted) {
+    socket.off('callAccepted');
 
+    socket.on('callAccepted', (data) {
+      debugPrint('[Socket] Call accepted: $data');
+      onCallAccepted(data);
+    });
+  }
+
+  acceptCall(String s, int i) {
+    socket.emit('acceptCall', {
+      'callID': s,
+      'fromUserID': Util.userId,
+      'toUserID': i,
+    });
+  }
+
+  rejectCall(String s, int i) {
+    socket.emit('rejectCall', {
+      'callID': s,
+      'fromUserID': Util.userId,
+      'toUserID': i,
+    });
+  }
+
+  void listenCallReject(Function() eventReject) {
+    socket.off('callRejected');
+    socket.on('callRejected', (data) {
+      eventReject();
+    });
+  }
+
+  void cancelCall(String callID, int userId, int toUserID) {
+    debugPrint('[Socket] Cancel call: $callID');
+
+    socket.emit('cancelCall', {
+
+        'callID': callID,
+        'fromUserID': userId,
+        'toUserID': toUserID,
+        });
+  }
+
+  void listenCancelCall(Function() eventCancelCall) {
+    socket.off('callCanceled');
+    socket.on('callCanceled', (data) {
+      debugPrint('listen cancel call');
+
+      eventCancelCall();
+    });
+  }
 }
