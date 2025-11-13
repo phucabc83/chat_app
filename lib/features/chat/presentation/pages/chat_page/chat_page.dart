@@ -135,7 +135,7 @@ class ChatPage extends StatefulWidget {
                 child: PagingListener<RequestMessage?, Message>(
                   controller: chatBloc.pagingController,
                   builder: (context, pagingState, fetchNextPage) {
-                    return PagedListView<RequestMessage?, Message>(
+                    return PagedListView<RequestMessage?, Message>.separated(
                       state: pagingState,
                       fetchNextPage: fetchNextPage,
                       reverse: true,
@@ -144,12 +144,12 @@ class ChatPage extends StatefulWidget {
                           final isSender = item.senderId == Util.userId;
                           final isLast = item.id == pagingState.pages?.first?.first?.id;
                           return buildMessageBubble(
-                            Theme.of(context),
-                            item.content,
-                            isSender,
-                            isLast,
-                            item.getStatus(isGroup),
-                            item.messageType
+                              Theme.of(context),
+                              item.content,
+                              isSender,
+                              isLast,
+                              item.getStatus(isGroup),
+                              item.messageType
                           );
                         },
                         firstPageProgressIndicatorBuilder: (context) => const Center(
@@ -157,11 +157,12 @@ class ChatPage extends StatefulWidget {
                         ),
                         newPageProgressIndicatorBuilder: (context) => const Center(
                           child: CircularProgressIndicator(),
-                      ),
+                        ),
                         noItemsFoundIndicatorBuilder: (context) => const Center(
                           child: Text('No messages yet'),
                         ),
                       ),
+                      separatorBuilder: (context, index) => const SizedBox(height: 12)
                     );
                   }
                 ),
@@ -193,7 +194,7 @@ class ChatPage extends StatefulWidget {
 
             if (lastMessage && isSender) // Hiển thị replyTo chỉ cho tin nhắn cuối cùng
                 Padding(
-                  padding: const EdgeInsets.only(top: 5,right: 5),
+                  padding: const EdgeInsets.only(right: 8.0,left: 8.0, bottom: 7.0),
                   child: Text(
                     status,
                     style: TextStyle(fontSize: 12, color: Colors.white70),
@@ -275,9 +276,13 @@ class ChatPage extends StatefulWidget {
   }
 
   void _sendMessage(int conversationId, String content, int senderId,MessageType messageType,int? replyTo,bool isGroup) {
-    context.read<ChatBloc>().add(
-      MessageSendEvent(conversationId: conversationId, content: content, messageType: messageType,replyTo: replyTo, isGroup: isGroup)
-    );
+
+      if(content.trim().isNotEmpty){
+        context.read<ChatBloc>().add(
+            MessageSendEvent(conversationId: conversationId, content: content, messageType: messageType,replyTo: replyTo, isGroup: isGroup)
+        );
+      }
+
 
 
 

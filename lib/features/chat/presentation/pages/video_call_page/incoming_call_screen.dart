@@ -137,6 +137,5 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
 
   void _rejectCall() {
     context.read<InComingCallCubit>().declineCall();
-
   }
 }

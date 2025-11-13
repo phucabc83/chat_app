@@ -21,7 +21,7 @@ extension PagingControllerChatOps
   /// Thêm message mới lên đầu trang đầu tiên (optimistic insert)
   void prependMessage(Message m) {
     final s = value;
-    final pages = List<List<Message>>.from(s.pages ?? const []);
+    final pages = (s.pages ?? const []).map<List<Message>>((p) => List<Message>.from(p.cast<Message>())).toList();
     if (pages.isEmpty) {
       pages.add([m]);
     } else {
@@ -38,7 +38,7 @@ extension PagingControllerChatOps
   /// (mỗi event +1, không vượt quá totalRecipients)
   void incrementReadUpTo({required int upTo, required int currentUserId}) {
     final s = value;
-    final pages = List<List<Message>>.from(s.pages ?? const []);
+    final pages = (s.pages ?? const []).map<List<Message>>((p) => List<Message>.from(p.cast<Message>())).toList();
     var changed = false;
 
     for (var p = 0; p < pages.length; p++) {
@@ -62,7 +62,7 @@ extension PagingControllerChatOps
   /// (mỗi event +1, không vượt quá totalRecipients)
   void incrementDeliveredById(int messageId) {
     final s = value;
-    final pages = List<List<Message>>.from(s.pages ?? const []);
+    final pages = (s.pages ?? const []).map<List<Message>>((p) => List<Message>.from(p.cast<Message>())).toList();
     var changed = false;
 
     for (var p = 0; p < pages.length; p++) {
@@ -135,6 +135,8 @@ class ChatBloc extends Bloc<ChatEvent, StateUI> {
         isGroup: event.isGroup,
       );
 
+      messages.add(message);
+      pagingController.prependMessage(message);
 
     } catch (e) {
       emit(Failture(e.toString()));

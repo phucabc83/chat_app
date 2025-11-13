@@ -1,4 +1,5 @@
 
+import 'package:chat_app/core/service/audio_manage.dart';
 import 'package:chat_app/core/service/socket_service.dart';
 
 import 'package:chat_app/features/chat/domain/entities/messsage.dart';
@@ -76,9 +77,11 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState>{
       conversation.lastMessageTime = message.sentAt;
       if(message.senderId != Util.userId  && message.readCount < message.totalRecipients &&
           message.deliveredCount < message.totalRecipients ) {
-
-
         conversation.unreadCount += 1;
+      }
+
+      if(message.senderId != Util.userId){
+        AudioManager().playAsset('message_audio.mp3',isLoop: false);
       }
       emit(ConversationSuccess<List<Conversation>>(List.from(conversations)));
   }

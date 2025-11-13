@@ -21,17 +21,19 @@ class OutGoingCallCubit extends Cubit<OutGoingCallState>{
   }
 
   void makeCall(String callID, int userIdReceiver)  {
-    emit(state.copyWith(status: OutGoingCallStatus.calling, error: null));
     AudioManager().playAsset('outgoing_audio.mp3');
+
+    emit(state.copyWith(status: OutGoingCallStatus.calling, error: null));
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       count--;
       emit(state.copyWith(reminderTime:count));
 
       if (count <= 0 && state.status == OutGoingCallStatus.calling) {
+        AudioManager().playAsset('end_audio.mp3',isLoop: false);
+
         emit(state.copyWith(status: OutGoingCallStatus.cancel));
         _timer?.cancel();
         count = 30;
-        AudioManager().playAsset('end_audio.mp3');
         _socketService.cancelCall(callID,Util.userId,userIdReceiver);
 
 
@@ -48,6 +50,8 @@ class OutGoingCallCubit extends Cubit<OutGoingCallState>{
       });
 
       _socketService.listenCallReject((){
+        AudioManager().stop();
+
         debugPrint("❌ call rejected");
         emit(state.copyWith(status: OutGoingCallStatus.cancel));
       });
@@ -65,17 +69,12 @@ class OutGoingCallCubit extends Cubit<OutGoingCallState>{
   void cancelCall(String callID,int toUserID) {
 
     _timer?.cancel();
-    AudioManager().playAsset('end_audio.mp3');
+    AudioManager().playAsset('end_audio.mp3',isLoop: false);
 
     emit(state.copyWith(status: OutGoingCallStatus.cancel));
     _socketService.cancelCall(callID,Util.userId,toUserID);
   }
-  @override
-  Future<void> close() async {
-    _timer?.cancel();
 
-    super.close();
-  }
 
 
 }

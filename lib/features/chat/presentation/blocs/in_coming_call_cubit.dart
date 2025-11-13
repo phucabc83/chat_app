@@ -3,6 +3,8 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/service/audio_manage.dart';
+
 class InComingCallCubit extends Cubit<InComingCallState> {
 
   final SocketService  socketService;
@@ -20,8 +22,10 @@ class InComingCallCubit extends Cubit<InComingCallState> {
     required String callID,
     required int reminderTime,
   }) {
+    AudioManager().playAsset('incoming_audio.mp3');
 
-      emit(state.copyWith(
+
+    emit(state.copyWith(
         status: InComingCallStatus.ringing,
         usernameCaller: usernameCaller,
         avatarUrlCaller: avatarUrlCaller,
@@ -31,13 +35,18 @@ class InComingCallCubit extends Cubit<InComingCallState> {
       )
       );
 
+
   }
   void acceptCall() {
+    AudioManager().stop();
+
     if(state.status == InComingCallStatus.ringing){
       emit(state.copyWith(
         status: InComingCallStatus.accepted,
       )
       );
+
+
       socketService.acceptCall(state.callID!,state.callerID!);
 
     }
@@ -46,17 +55,25 @@ class InComingCallCubit extends Cubit<InComingCallState> {
 
   void declineCall() {
    if(state.status == InComingCallStatus.ringing){
+     AudioManager().playAsset('end_audio.mp3',isLoop: false);
+
      emit(state.copyWith(status: InComingCallStatus.declined));
      socketService.rejectCall(state.callID!,state.callerID!);
    }
+
   }
 
   void missedCall() {
     if (state.status == InComingCallStatus.ringing) {
+      debugPrint('📞 Missed call from ${state.usernameCaller}');
+      AudioManager().playAsset('end_audio.mp3',isLoop: false);
+
       emit(state.copyWith(
         status: InComingCallStatus.missed,
       )
       );
+
+
     }
   }
 
@@ -74,6 +91,15 @@ class InComingCallCubit extends Cubit<InComingCallState> {
       () => missedCall(),
     );
   }
+
+
+
+  @override
+  Future<void> close() async {
+    AudioManager().stop();
+    super.close();
+  }
+
 }
 
 
@@ -136,4 +162,6 @@ class InComingCallState {
       callID: callID ?? this.callID,
     );
   }
+
+
 }

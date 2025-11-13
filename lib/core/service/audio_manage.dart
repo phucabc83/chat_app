@@ -1,4 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/cupertino.dart';
 
 class AudioManager {
   static final AudioManager _instance = AudioManager._internal();
@@ -7,15 +8,25 @@ class AudioManager {
 
   final AudioPlayer _audioPlayer = AudioPlayer();
 
-  Future<void> playAsset(String audioName) async {
+
+
+  Future<void> playAsset(String audioName, {bool isLoop = true}) async {
+
     if(_audioPlayer.state == PlayerState.playing) {
+      await _audioPlayer.pause();
       await _audioPlayer.stop();
     }
-    await _audioPlayer.play(AssetSource('assets/sounds/$audioName'));
+    await _audioPlayer.setReleaseMode(
+        isLoop ? ReleaseMode.loop : ReleaseMode.release);
+
+    debugPrint('Playing asset audio: $audioName');
+    await _audioPlayer.play(AssetSource('sounds/$audioName'));
   }
 
   Future<void> playUrl(String url) async {
     if(_audioPlayer.state == PlayerState.playing) {
+      await _audioPlayer.pause();
+
       await _audioPlayer.stop();
     }
     await _audioPlayer.play(UrlSource(url));
@@ -24,7 +35,9 @@ class AudioManager {
   // Dừng audio
   Future<void> stop() async {
     if(_audioPlayer.state == PlayerState.playing) {
-        await _audioPlayer.stop();
+      await _audioPlayer.pause();
+
+      await _audioPlayer.stop();
     }
   }
 
@@ -42,6 +55,8 @@ class AudioManager {
     }
   }
   Future<void> dispose() async {
+    await _audioPlayer.pause();
+
     await _audioPlayer.stop();
     await _audioPlayer.dispose();
   }
