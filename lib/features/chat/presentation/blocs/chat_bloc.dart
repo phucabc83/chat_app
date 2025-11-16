@@ -90,19 +90,19 @@ class ChatBloc extends Bloc<ChatEvent, StateUI> {
   bool _lastHasMore = true;
   late PagingController<RequestMessage?, Message> pagingController;
 
-  // final ImagePickerService imagePickerService;
-  // final SupabaseStorageService supabaseStorageService;
+  final ImagePickerService imagePickerService;
+  final SupabaseStorageService supabaseStorageService;
 
   ChatBloc(
     this.loadMessageUseCase,
-    // this.imagePickerService,
-    // this.supabaseStorageService,
+    this.imagePickerService,
+    this.supabaseStorageService,
   ) : super(Initial()) {
     debugPrint('[ChatBloc] constructor');
     on<MarkMessageReadEvent>(_markMessageRead);
     on<MessageSendEvent>(_sendMessage);
     initPagingController();
-    // on<SendImageMessage>(_sendImageMessage);
+    on<SendImageMessage>(_sendImageMessage);
 
   }
 
@@ -318,65 +318,65 @@ class ChatBloc extends Bloc<ChatEvent, StateUI> {
     );
   }
   //
-  // FutureOr<void> _sendImageMessage(
-  //   SendImageMessage event,
-  //   Emitter<StateUI> emit,
-  // ) async {
-  //   final imagePick = await imagePickerService.pickImage();
-  //   if (imagePick == null) return;
-  //   Uint8List inputBytes;
-  //
-  //   final fileName = imagePick['fileName'];
-  //
-  //   if (fileName == null) return;
-  //
-  //   if (kIsWeb) {
-  //     final fileBytes = imagePick['fileBytes'];
-  //     if (fileBytes == null) return;
-  //     inputBytes = fileBytes;
-  //   } else {
-  //     final filePath = imagePick['filePath'];
-  //     if (filePath == null) return;
-  //     inputBytes = await File(filePath!).readAsBytes();
-  //   }
-  //
-  //   // 2) Compress (ví dụ mục tiêu ~80KB, khung 1080p, auto format)
-  //   final out = await ImageCompressor.compressBytes(
-  //     inputBytes,
-  //     options: const ImageCompressOptions(
-  //       targetKB: 80,
-  //       maxWidth: 1080,
-  //       maxHeight: 1080,
-  //       startQuality: 85,
-  //       minQuality: 40,
-  //       format: OutputFormat.auto, // PNG nếu có alpha, JPEG nếu không
-  //     ),
-  //   );
-  //
-  //   // 3) Gợi ý tên file & upload
-  //   final newName = ImageCompressor.suggestFileName(fileName, out);
-  //
-  //
-  //   final message = await socketService.sendMessage(
-  //     conversationId: state.conversationId,
-  //     content: event.content,
-  //     senderId: Util.userId,
-  //     messageType: event.messageType,
-  //     senderName: Util.userName,
-  //     replyTo: event.replyTo,
-  //     isGroup: event.isGroup,
-  //     fileNameImage: newName,
-  //     bytesImage: out.bytes,
-  //     mimeType: out.mimeType
-  //   );
-  //
-  //
-  //   messages.add(message);
-  //
-  //   pagingController.prependMessage(message);
-  //
-  //
-  //
-  //
-  // }
+  FutureOr<void> _sendImageMessage(
+    SendImageMessage event,
+    Emitter<StateUI> emit,
+  ) async {
+    final imagePick = await imagePickerService.pickImage();
+    if (imagePick == null) return;
+    Uint8List inputBytes;
+
+    final fileName = imagePick['fileName'];
+
+    if (fileName == null) return;
+
+    if (kIsWeb) {
+      final fileBytes = imagePick['fileBytes'];
+      if (fileBytes == null) return;
+      inputBytes = fileBytes;
+    } else {
+      final filePath = imagePick['filePath'];
+      if (filePath == null) return;
+      inputBytes = await File(filePath!).readAsBytes();
+    }
+
+    // 2) Compress (ví dụ mục tiêu ~80KB, khung 1080p, auto format)
+    final out = await ImageCompressor.compressBytes(
+      inputBytes,
+      options: const ImageCompressOptions(
+        targetKB: 80,
+        maxWidth: 1080,
+        maxHeight: 1080,
+        startQuality: 85,
+        minQuality: 40,
+        format: OutputFormat.auto, // PNG nếu có alpha, JPEG nếu không
+      ),
+    );
+
+    // 3) Gợi ý tên file & upload
+    final newName = ImageCompressor.suggestFileName(fileName, out);
+
+
+    final message = await socketService.sendMessage(
+      conversationId: state.conversationId,
+      content: event.content,
+      senderId: Util.userId,
+      messageType: event.messageType,
+      senderName: Util.userName,
+      replyTo: event.replyTo,
+      isGroup: event.isGroup,
+      fileNameImage: newName,
+      bytesImage: out.bytes,
+      mimeType: out.mimeType
+    );
+
+
+    messages.add(message);
+
+    pagingController.prependMessage(message);
+
+
+
+
+  }
 }

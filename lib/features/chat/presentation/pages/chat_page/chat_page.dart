@@ -6,6 +6,7 @@ import 'package:chat_app/core/theme/theme_app.dart';
 import 'package:chat_app/core/utils/util.dart';
 import 'package:chat_app/features/chat/presentation/blocs/chat_bloc.dart';
 import 'package:chat_app/features/chat/presentation/widgets/bottom_sheeet_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -185,17 +186,17 @@ class ChatPage extends StatefulWidget {
   Widget buildMessageBubble(ThemeData theme, String message, bool isSender,bool lastMessage,String status, MessageType messageType) {
     return Align(
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        decoration: BoxDecoration(
-          color: isSender
-              ? DefaultColors.senderMessage.withOpacity(0.3)
-              : DefaultColors.receiverMessage.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(15),
-        ),
         child: Column(
           crossAxisAlignment: isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children:[
-            contentMessage(messageType,message,theme),
+            Container(
+                decoration: BoxDecoration(
+                    color: isSender
+                        ? DefaultColors.senderMessage.withOpacity(0.3)
+                        : DefaultColors.receiverMessage.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(15)),
+                child: contentMessage(messageType,message,theme)
+            ),
 
             if (lastMessage && isSender && messageType != MessageType.video) // Hiển thị replyTo chỉ cho tin nhắn cuối cùng
                 Padding(
@@ -207,7 +208,6 @@ class ChatPage extends StatefulWidget {
                 ),
           ]
         ),
-      ),
     );
   }
 
@@ -222,14 +222,14 @@ class ChatPage extends StatefulWidget {
         children: [
           IconButton(
             onPressed: (){
-              // _sendImageMessage(
-              //     widget.conversationId,
-              //     'image message',
-              //     Util.userId,
-              //     MessageType.image,
-              //     replyTo,
-              //     widget.isGroup
-              // );
+              _sendImageMessage(
+                  widget.conversationId,
+                  'image message',
+                  Util.userId,
+                  MessageType.image,
+                  replyTo,
+                  widget.isGroup
+              );
             },
             icon: const Icon(Icons.camera_alt_outlined, color: Colors.white70),
           ),
@@ -337,8 +337,8 @@ class ChatPage extends StatefulWidget {
                borderRadius: BorderRadius.circular(12),
                child: CachedNetworkImage(
                  imageUrl: message,
-                 width: getWidth(context)*0.2,
-                 height: getWidth(context)*0.15,
+                 width: kIsWeb ? getWidth(context)*0.25 : getWidth(context)*0.4,
+                 height: kIsWeb ? getWidth(context)*0.25 : getWidth(context)*0.35,
                  fit: BoxFit.cover,
                  placeholder: (context, url) => const Center(
                    child: CircularProgressIndicator(),

@@ -101,38 +101,36 @@ Future<void>  setupDI() async {
   sl.registerLazySingleton<LoadMessageUseCase>(
         () => LoadMessageUseCase(sl<ChatRepositoryImpl>()),
   );
-  // sl.registerLazySingleton<ImagePickerService>(
-  //     () => ImagePickerService()
-  // );
-  // sl.registerLazySingleton<SupabaseStorageService>(
-  //     () => SupabaseStorageService()
-  // );
+  sl.registerLazySingleton<ImagePickerService>(
+      () => ImagePickerService()
+  );
+  sl.registerLazySingleton<SupabaseStorageService>(
+      () => SupabaseStorageService()
+  );
   sl.registerFactory<ChatBloc>(() => ChatBloc(sl<LoadMessageUseCase>()
-       // ,sl<ImagePickerService>(),sl<SupabaseStorageService>()
+       ,sl<ImagePickerService>(),sl<SupabaseStorageService>()
   ));
-  //
-  // sl.registerLazySingleton<PermissionService>(
-  //     () => PermissionService()
-  // );
 
-  // sl.registerLazySingleton<DownloaderService>(
-  //         () => DownloaderService(
-  //           supabase: Supabase.instance.client,
-  //           bucket: 'avatars'
-  //         )
-  // );
+  sl.registerLazySingleton<PermissionService>(
+      () => PermissionService()
+  );
 
-  // sl.registerFactory<ImageSaveCubit>(
-  //         () => ImageSaveCubit(permissionService: sl<PermissionService>(), downloaderService: sl<DownloaderService>())
-  // );
+  sl.registerLazySingleton<DownloaderService>(
+          () => DownloaderService(
+            supabase: Supabase.instance.client,
+            bucket: 'avatars'
+          )
+  );
+
+  sl.registerFactory<ImageSaveCubit>(
+          () => ImageSaveCubit(permissionService: sl<PermissionService>(), downloaderService: sl<DownloaderService>())
+  );
 
 
   sl.registerFactory<OutGoingCallCubit>(() => OutGoingCallCubit(sl<SocketService>()
-    // ,sl<ImagePickerService>(),sl<SupabaseStorageService>()
   ));
 
   sl.registerFactory<InComingCallCubit>(() => InComingCallCubit(sl<SocketService>()
-    // ,sl<ImagePickerService>(),sl<SupabaseStorageService>()
   ));
 
   // ----- Group -----
