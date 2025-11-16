@@ -70,6 +70,8 @@ class RouterApp {
         builder: (context, router) {
           final callID = router.pathParameters['id']!;
           final userIdReceiver = router.uri.queryParameters['userIdReceiver']!;
+          final conversationId = router.uri.queryParameters['conversationId']!;
+
           final usernameReceiver =
               router.uri.queryParameters['usernameReceiver']!;
           final avatarUrl = router.uri.queryParameters['avatarUrl']!;
@@ -81,6 +83,7 @@ class RouterApp {
               avatarUrl: avatarUrl,
               userIdReceiver: int.parse(userIdReceiver),
               usernameReceiver: usernameReceiver,
+              conversationId: int.parse(conversationId),
             ),
           );
         },

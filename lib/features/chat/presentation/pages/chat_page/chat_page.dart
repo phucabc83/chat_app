@@ -59,6 +59,7 @@ class ChatPage extends StatefulWidget {
       chatBloc = context.read<ChatBloc>();
       conversationId = widget.conversationId;
       isGroup = widget.isGroup;
+      Util.conversationIdActive = widget.conversationId;
 
       _controller = TextEditingController();
       avatar = widget.avatar;
@@ -122,7 +123,11 @@ class ChatPage extends StatefulWidget {
                     callID: 'call_${widget.conversationId}_${Util.userId}_${chatBloc.state.replyTo.toString()}',
                     userIdReceiver: chatBloc.state.replyTo.toString(),
                     userName: Util.userName,
+                    conversationId: widget.conversationId,
+
                   );
+
+
                 },
 
               ),
@@ -157,7 +162,7 @@ class ChatPage extends StatefulWidget {
                         ),
                         newPageProgressIndicatorBuilder: (context) => const Center(
                           child: CircularProgressIndicator(),
-                        ),
+                           ),
                         noItemsFoundIndicatorBuilder: (context) => const Center(
                           child: Text('No messages yet'),
                         ),
@@ -192,7 +197,7 @@ class ChatPage extends StatefulWidget {
           children:[
             contentMessage(messageType,message,theme),
 
-            if (lastMessage && isSender) // Hiển thị replyTo chỉ cho tin nhắn cuối cùng
+            if (lastMessage && isSender && messageType != MessageType.video) // Hiển thị replyTo chỉ cho tin nhắn cuối cùng
                 Padding(
                   padding: const EdgeInsets.only(right: 8.0,left: 8.0, bottom: 7.0),
                   child: Text(
@@ -282,10 +287,6 @@ class ChatPage extends StatefulWidget {
             MessageSendEvent(conversationId: conversationId, content: content, messageType: messageType,replyTo: replyTo, isGroup: isGroup)
         );
       }
-
-
-
-
   }
 
   @override
@@ -303,16 +304,16 @@ class ChatPage extends StatefulWidget {
 
 
     void _sendImageMessage(int conversationId, String content, int senderId,MessageType messageType,int? replyTo,bool isGroup) {
-      // context.read<ChatBloc>().add(
-      //     // SendImageMessage(
-      //     //     imagePath: '',
-      //     //     conversationId: conversationId,
-      //     //     content: content,
-      //     //     messageType: messageType,
-      //     //     replyTo: replyTo,
-      //     //     isGroup: isGroup
-      //     // )
-      // );
+      context.read<ChatBloc>().add(
+          SendImageMessage(
+              imagePath: '',
+              conversationId: conversationId,
+              content: content,
+              messageType: messageType,
+              replyTo: replyTo,
+              isGroup: isGroup
+          )
+      );
 
     }
 
@@ -352,9 +353,22 @@ class ChatPage extends StatefulWidget {
            ),
          );
 
-      } else {
-        return const SizedBox.shrink(); // Trả về một widget rỗng nếu không phải text hoặc image
+      } else if(messageType == MessageType.video) {
+        return Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const Icon(Icons.videocam, color: Colors.white70),
+              const SizedBox(height: 8),
+              Text(message, style: theme.textTheme.bodyMedium),
+            ],
+          ),
+        );
       }
+
+      return SizedBox.shrink();
     }
 
 
@@ -363,8 +377,10 @@ class ChatPage extends StatefulWidget {
       return uri != null && (uri.isScheme('http') || uri.isScheme('https')) && uri.host.isNotEmpty;
     }
 
-  void navigateToVideoCallPage({required String callID, required String userIdReceiver, required String userName}) {
-      debugPrint('infor navigate to outGoingCallName page: callID=$callID, userID=$userIdReceiver, userName=$userName');
+  void navigateToVideoCallPage({required String callID, required String userIdReceiver,
+    required String userName,required int conversationId}) {
+      debugPrint('infor navigate to outGoingCallName page: callID=$callID, '
+          'userID=$userIdReceiver, userName=$userName');
       context.pushNamed(
         AppRouteInfor.outGoingCallName,
         pathParameters: {
@@ -373,14 +389,13 @@ class ChatPage extends StatefulWidget {
         queryParameters: {
           'userIdReceiver': userIdReceiver,
           'usernameReceiver': userName,
-          'avatarUrl': avatar ?? ''
+          'avatarUrl': avatar ?? '',
+          'conversationId': conversationId.toString()
         },
       );
   }
+
+
 }
-
-
-
-
 
 

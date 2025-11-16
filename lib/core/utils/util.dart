@@ -16,6 +16,7 @@ class Util {
 
   static String fcmToken = '';
   static bool isEmulator = false;
+  static int conversationIdActive = 0;
 
   static String apiBaseUrl() {
     const port = 6002;

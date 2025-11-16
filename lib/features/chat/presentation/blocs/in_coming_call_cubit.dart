@@ -1,5 +1,4 @@
 import 'package:chat_app/core/service/socket_service.dart';
-import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -21,6 +20,7 @@ class InComingCallCubit extends Cubit<InComingCallState> {
     required int callerID,
     required String callID,
     required int reminderTime,
+    required int conversationId,
   }) {
     AudioManager().playAsset('incoming_audio.mp3');
 
@@ -32,10 +32,9 @@ class InComingCallCubit extends Cubit<InComingCallState> {
         callerID: callerID,
         callID: callID,
         reminderTime: reminderTime,
+        conversationId: conversationId
       )
       );
-
-
   }
   void acceptCall() {
     AudioManager().stop();
@@ -45,9 +44,7 @@ class InComingCallCubit extends Cubit<InComingCallState> {
         status: InComingCallStatus.accepted,
       )
       );
-
-
-      socketService.acceptCall(state.callID!,state.callerID!);
+      socketService.acceptCall(state.callID!,state.callerID!,state.conversationId);
 
     }
 
@@ -58,7 +55,7 @@ class InComingCallCubit extends Cubit<InComingCallState> {
      AudioManager().playAsset('end_audio.mp3',isLoop: false);
 
      emit(state.copyWith(status: InComingCallStatus.declined));
-     socketService.rejectCall(state.callID!,state.callerID!);
+     socketService.rejectCall(state.callID!,state.callerID!,state.conversationId);
    }
 
   }
@@ -85,6 +82,7 @@ class InComingCallCubit extends Cubit<InComingCallState> {
       callerID: data['fromUserID'],
       callID: data['callID'],
       reminderTime: data['reminderTime'],
+      conversationId:data['conversationId']
     );
 
     socketService.listenCancelCall(
@@ -124,6 +122,7 @@ class InComingCallState {
   final String? avatarUrlCaller;
   final int? callerID;
   final String? callID;
+  final int conversationId;
   InComingCallState({
     required this.status,
     required this.error,
@@ -132,6 +131,7 @@ class InComingCallState {
     this.avatarUrlCaller,
     this.callerID,
     this.callID,
+    required this.conversationId,
   });
 
   const InComingCallState.initial():
@@ -141,27 +141,30 @@ class InComingCallState {
         usernameCaller = null,
         avatarUrlCaller = null,
         callerID = null,
-        callID = null;
+        callID = null,
+        conversationId = 0;
 
-  InComingCallState copyWith({
-    InComingCallStatus? status,
-    String? error,
-    int? reminderTime,
-     String? usernameCaller,
-     String? avatarUrlCaller,
-     int? callerID,
-     String? callID,
-  }) {
-    return InComingCallState(
-      status: status ?? this.status,
-      error: error ?? this.error,
-      reminderTime: reminderTime ?? this.reminderTime,
-      usernameCaller: usernameCaller ?? this.usernameCaller,
-      avatarUrlCaller: avatarUrlCaller ?? this.avatarUrlCaller,
-      callerID: callerID ?? this.callerID,
-      callID: callID ?? this.callID,
-    );
-  }
 
+        InComingCallState copyWith({
+          InComingCallStatus? status,
+          String? error,
+          int? reminderTime,
+           String? usernameCaller,
+           String? avatarUrlCaller,
+           int? callerID,
+           String? callID,
+            int? conversationId,
+        }) {
+          return InComingCallState(
+              status: status ?? this.status,
+              error: error ?? this.error,
+              reminderTime: reminderTime ?? this.reminderTime,
+              usernameCaller: usernameCaller ?? this.usernameCaller,
+              avatarUrlCaller: avatarUrlCaller ?? this.avatarUrlCaller,
+              callerID: callerID ?? this.callerID,
+              callID: callID ?? this.callID,
+              conversationId: this.conversationId,
+          );
+        }
 
 }

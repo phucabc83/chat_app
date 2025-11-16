@@ -395,13 +395,14 @@ class SocketService {
     return true;
   }
 
-  void makeCall(String callID, int userIdReceiver) {
+  void makeCall(String callID, int userIdReceiver,int conversationId) {
     socket.emit('makeCall', {
       'callID': callID,
       'fromUserID': Util.userId,
       'toUserID': userIdReceiver,
       'fromUserName': Util.userName,
       'fromAvatarUrl': Util.avatarUrl,
+      'conversationId':conversationId
     });
   }
 
@@ -423,20 +424,40 @@ class SocketService {
     });
   }
 
-  acceptCall(String s, int i) {
+  acceptCall(String s, int i,int conversationId) {
     socket.emit('acceptCall', {
       'callID': s,
       'fromUserID': Util.userId,
       'toUserID': i,
     });
+
+    sendMessage(
+        conversationId: conversationId,
+        content: 'Cuộc gọi video',
+        senderId: Util.userId,
+        messageType: MessageType.video,
+        senderName: Util.userName,
+        isGroup: false
+    );
+
+
   }
 
-  rejectCall(String s, int i) {
+  rejectCall(String s, int i,int conversationId) {
     socket.emit('rejectCall', {
       'callID': s,
       'fromUserID': Util.userId,
       'toUserID': i,
     });
+
+    sendMessage(
+        conversationId: conversationId,
+        content: 'Cuộc gọi nhỡ',
+        senderId: Util.userId,
+        messageType: MessageType.video,
+        senderName: Util.userName,
+        isGroup: false
+    );
   }
 
   void listenCallReject(Function() eventReject) {
@@ -444,17 +465,28 @@ class SocketService {
     socket.on('callRejected', (data) {
       eventReject();
     });
+
+
+
   }
 
-  void cancelCall(String callID, int userId, int toUserID) {
+  void cancelCall(String callID, int userId, int toUserID,int conversationId) {
     debugPrint('[Socket] Cancel call: $callID');
-
+//        const { conversationId, content, senderId, messageType, replyTo, isGroup,fileNameImage,bytesImage,mimeType} = data;
     socket.emit('cancelCall', {
-
         'callID': callID,
         'fromUserID': userId,
         'toUserID': toUserID,
         });
+    sendMessage(
+        conversationId: conversationId,
+        content: 'Cuộc gọi nhỡ',
+        senderId: Util.userId,
+        messageType: MessageType.video,
+        senderName: Util.userName,
+        isGroup: false
+    );
+
   }
 
   void listenCancelCall(Function() eventCancelCall) {

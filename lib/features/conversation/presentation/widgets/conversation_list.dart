@@ -48,6 +48,7 @@ class _MessageCardState extends State<MessageCard> {
         widget.conversation.avatarUrl ??
         'https://i.pravatar.cc/300?img=${widget.conversation.conversationId % 70 + 1}';
 
+
     return GestureDetector(
       onTap: () {
         context.pushNamed(
@@ -62,6 +63,8 @@ class _MessageCardState extends State<MessageCard> {
         );
 
         setState(() {
+          debugPrint('setstate conversation ');
+
           widget.conversation.unreadCount = 0;
         });
 

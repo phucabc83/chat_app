@@ -13,6 +13,7 @@ class OutGoingCallScreen extends StatefulWidget {
   final String callType; // 'video' or 'voice'
   final int userIdReceiver;
   final String usernameReceiver;
+  final int conversationId;
 
   const OutGoingCallScreen({
     super.key,
@@ -20,7 +21,8 @@ class OutGoingCallScreen extends StatefulWidget {
     required this.avatarUrl,
      this.callType = 'video',
     required this.userIdReceiver,
-    required this.usernameReceiver
+    required this.usernameReceiver,
+    required  this.conversationId,
   });
 
   @override
@@ -31,7 +33,7 @@ class _OutGoingCallScreenState extends State<OutGoingCallScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<OutGoingCallCubit>().makeCall(widget.callID, widget.userIdReceiver);
+    context.read<OutGoingCallCubit>().makeCall(widget.callID, widget.userIdReceiver,widget.conversationId);
   }
   @override
   Widget build(BuildContext context) {
@@ -136,6 +138,6 @@ class _OutGoingCallScreenState extends State<OutGoingCallScreen> {
   }
 
   void _cancelCall() {
-    context.read<OutGoingCallCubit>().cancelCall(widget.callID, widget.userIdReceiver);
+    context.read<OutGoingCallCubit>().cancelCall(widget.callID, widget.userIdReceiver,widget.conversationId);
   }
 }

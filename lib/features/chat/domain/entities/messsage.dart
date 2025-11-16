@@ -85,9 +85,9 @@ class Message {
       replyTo: json['replyTo'],
       sentAt: DateTime.parse(json['sentAt']),
 
-      deliveredCount: json['delivered_count'] ?? 0,
-      readCount: json['read_count'] ?? 0,
-      totalRecipients: json['total_recipients'] ?? 0,
+      deliveredCount: json['deliveredCount'] ?? 0,
+      readCount: json['readCount'] ?? 0,
+      totalRecipients: json['totalRecipients'] ?? 0,
 
 
     );
