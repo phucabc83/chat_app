@@ -35,7 +35,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.chat_app"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 36
         versionCode = flutterVersionCode.toInt()
         versionName = flutterVersionName

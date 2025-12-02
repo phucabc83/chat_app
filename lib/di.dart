@@ -1,4 +1,3 @@
-
 import 'package:chat_app/core/permissions/permission_service.dart';
 import 'package:chat_app/core/service/downloader_service.dart';
 import 'package:chat_app/core/service/image_picker_service.dart';
@@ -52,6 +51,15 @@ import 'features/conversation/data/repositories/user_repository_impl.dart';
 import 'features/conversation/domain/usecases/fetch_all_user_usecase.dart';
 import 'features/conversation/presentation/blocs/user/users_cubit.dart';
 import 'features/conversation/presentation/blocs/user/users_online_bloc.dart';
+
+// ===== Social =====
+import 'package:chat_app/features/social/data/data_sources/social_remote_data_source.dart';
+import 'package:chat_app/features/social/data/repositories/social_repository_impl.dart';
+import 'package:chat_app/features/social/domain/repositories/social_repository.dart';
+import 'package:chat_app/features/social/domain/usecases/fetch_posts_usecase.dart';
+import 'package:chat_app/features/social/domain/usecases/create_post_usecase.dart';
+import 'package:chat_app/features/social/domain/usecases/delete_post_usecase.dart';
+import 'package:chat_app/features/social/presentation/blocs/posts_cubit.dart';
 
 // ===== Friend (đã có module injection riêng) =====
 import 'features/friend/friend_injection.dart';
@@ -166,6 +174,19 @@ Future<void>  setupDI() async {
   );
   sl.registerFactory<UsersCubit>(() => UsersCubit(userUseCase: sl<FetchAllUserUseCase>()));
   sl.registerFactory<UsersOnlineBloc>(() => UsersOnlineBloc(sl<SocketService>()));
+
+  // ----- Social -----
+  final _socialRemote = SocialRemoteDataSource(apiService: sl<ApiService>());
+  sl.registerLazySingleton<SocialRemoteDataSource>(() => _socialRemote);
+  sl.registerLazySingleton<SocialRepository>(() => SocialRepositoryImpl(remoteDataSource: _socialRemote));
+  sl.registerLazySingleton<FetchPostsUseCase>(() => FetchPostsUseCase(sl<SocialRepository>()));
+  sl.registerLazySingleton<CreatePostUseCase>(() => CreatePostUseCase(sl<SocialRepository>()));
+  sl.registerLazySingleton<DeletePostUseCase>(() => DeletePostUseCase(sl<SocialRepository>()));
+  sl.registerFactory<PostsCubit>(() => PostsCubit(
+        fetchPostsUseCase: sl<FetchPostsUseCase>(),
+        createPostUseCase: sl<CreatePostUseCase>(),
+        deletePostUseCase: sl<DeletePostUseCase>(),
+  ));
 
   // ----- Friend module -----
   initFriendDependencies(); // hàm này tự register FriendBloc, repo… vào sl

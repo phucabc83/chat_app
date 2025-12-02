@@ -21,4 +21,8 @@ class AppRouteInfor {
   static const String addGroupName = 'add_group';
 
 
+  static const String createPostPath = '/create_post';
+  static const String createPostName = 'create_post';
+
+
 }
