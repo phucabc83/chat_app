@@ -6,6 +6,9 @@ import 'package:chat_app/features/chat/presentation/pages/video_call_page/incomi
 import 'package:chat_app/features/chat/presentation/pages/video_call_page/out_going_call_screen.dart';
 import 'package:chat_app/features/chat/presentation/pages/video_call_page/video_call_page.dart';
 import 'package:chat_app/features/conversation/presentation/pages/home_main_page.dart';
+import 'package:chat_app/features/social/presentation/blocs/create_posts_cubit.dart';
+import 'package:chat_app/features/social/presentation/blocs/posts_cubit.dart';
+import 'package:chat_app/features/social/presentation/pages/create_post_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -31,10 +34,7 @@ class RouterApp {
       GoRoute(
         path: AppRouteInfor.homePath,
         name: AppRouteInfor.homeName,
-        builder: (_, _) => BlocProvider<InComingCallCubit>(
-          create: (context) => sl<InComingCallCubit>(),
-          child: HomeMainPage(),
-        ),
+        builder: (_, _) => HomeMainPage(),
       ),
       GoRoute(
         path: AppRouteInfor.chatPath,
@@ -73,6 +73,8 @@ class RouterApp {
         builder: (context, router) {
           final callID = router.pathParameters['id']!;
           final userIdReceiver = router.uri.queryParameters['userIdReceiver']!;
+          final conversationId = router.uri.queryParameters['conversationId']!;
+
           final usernameReceiver =
               router.uri.queryParameters['usernameReceiver']!;
           final avatarUrl = router.uri.queryParameters['avatarUrl']!;
@@ -84,6 +86,7 @@ class RouterApp {
               avatarUrl: avatarUrl,
               userIdReceiver: int.parse(userIdReceiver),
               usernameReceiver: usernameReceiver,
+              conversationId: int.parse(conversationId),
             ),
           );
         },
@@ -116,20 +119,20 @@ class RouterApp {
         path: AppRouteInfor.videoCallPath,
         name: AppRouteInfor.videoCallName,
 
-        builder: (context, router) {
-          final callID = router.pathParameters['id']!;
-          final userID = router.uri.queryParameters['userID']!;
-          final userName = router.uri.queryParameters['userName']!;
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
 
-          print('id $callID name $userName userID $userID');
+          final callID = extra['callID']!;
+          final userIDReceiver = extra['userIDReceiver']!;
+          final userIDCaller = extra['userIDCaller']!;
 
-          return BlocProvider(
-            create: (context) => sl<ChatBloc>(),
-            child: VideoCallPage(
-              callID: callID,
-              userID: userID,
-              userName: userName,
-            ),
+
+          print('id $callID userIDReceiver $userIDReceiver userIDCaller $userIDCaller');
+
+          return VideoCallPage(
+            callID: callID,
+            userIDReceiver: userIDReceiver,
+            userIDCaller: userIDCaller,
           );
         },
       ),
@@ -147,6 +150,15 @@ class RouterApp {
         path: AppRouteInfor.addGroupPath,
         name: AppRouteInfor.addGroupName,
         builder: (_, _) => const AddGroupPage(),
+      ),
+
+      GoRoute(
+        path: AppRouteInfor.createPostPath,
+        name: AppRouteInfor.createPostName,
+        builder: (_, _) => BlocProvider(
+          create: (context) => sl<CreatePostsCubit>(),
+          child: const CreatePostPage(),
+        ),
       ),
     ],
     redirect: (context, state) {

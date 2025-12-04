@@ -3,6 +3,7 @@ import 'package:chat_app/features/chat/presentation/blocs/in_coming_call_cubit.d
 import 'package:chat_app/features/conversation/domain/usecases/fetch_all_user_usecase.dart';
 import 'package:chat_app/features/conversation/presentation/pages/home_page/home_page.dart';
 import 'package:chat_app/features/friend/presentation/pages/friend_list_page.dart';
+import 'package:chat_app/features/social/presentation/pages/posts_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -44,6 +45,7 @@ class _HomeMainPageState extends State<HomeMainPage> {
       HomePage(),
       GroupPage(),
       FriendListPage(),
+      PostsPage(),
     ];
     SocketService().connect();
 
@@ -94,7 +96,7 @@ class _HomeMainPageState extends State<HomeMainPage> {
             ],
           ),
           bottomNavigationBar: BottomNavigationBar(
-
+            type: BottomNavigationBarType.fixed,
             backgroundColor: const Color(0xFF18202D),
             selectedItemColor: Colors.white,
             unselectedItemColor: Colors.grey,
@@ -113,6 +115,11 @@ class _HomeMainPageState extends State<HomeMainPage> {
                 icon: Icon(Icons.people_alt_sharp),
                 label: 'Friends',
               ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.article),
+                label: 'Posts',
+              ),
+
             ],
             onTap: (index) {
               setState(() {

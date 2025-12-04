@@ -70,7 +70,7 @@ class _GroupPageState extends State<GroupPage> {
                   child: BlocBuilder<ConversationGroupCubit, ConversationGroupState>(
 
                     builder: (context,state){
-                      if(state.loading!){
+                      if(state.loading){
                         return Center(child: CircularProgressIndicator(color: DefaultColors.messageListPage));
                       }
                       if(state.error != null && state.error!.isNotEmpty){

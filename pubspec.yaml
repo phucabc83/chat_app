@@ -60,7 +60,8 @@ dependencies:
   file_saver:
   image_gallery_saver_plus: ^4.0.1
   zego_uikit_prebuilt_call: ^4.11.6
-
+  audioplayers:
+  emoji_keyboard_flutter:
 
 
 
@@ -83,6 +84,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/sounds/
     - .env
 
 

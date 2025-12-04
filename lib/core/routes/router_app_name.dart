@@ -8,7 +8,7 @@ class AppRouteInfor {
   static const String chatPath = '/chat/:id';
   static const String chatName = 'chat';
 
-  static const String videoCallPath = '/video_call/:id';
+  static const String videoCallPath = '/video_call';
   static const String videoCallName= 'video_call';
 
   static const String outGoingCallPath = '/out_going_call/:id';
@@ -19,6 +19,10 @@ class AppRouteInfor {
 
   static const String addGroupPath = '/add_group';
   static const String addGroupName = 'add_group';
+
+
+  static const String createPostPath = '/create_post';
+  static const String createPostName = 'create_post';
 
 
 }

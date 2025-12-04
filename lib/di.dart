@@ -1,10 +1,10 @@
-
 import 'package:chat_app/core/permissions/permission_service.dart';
 import 'package:chat_app/core/service/downloader_service.dart';
 import 'package:chat_app/core/service/image_picker_service.dart';
 import 'package:chat_app/core/service/supabase_storage_service.dart';
 import 'package:chat_app/features/chat/presentation/blocs/image_save_cubit.dart';
 import 'package:chat_app/features/chat/presentation/blocs/out_going_call_cubit.dart';
+import 'package:chat_app/features/social/presentation/blocs/create_posts_cubit.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -15,6 +15,7 @@ import 'core/service/fcm_service.dart';
 import 'core/service/socket_service.dart';
 import 'core/theme/theme_app.dart';
 import 'features/chat/presentation/blocs/in_coming_call_cubit.dart';
+import 'features/social/domain/usecases/like_post_usecase.dart';
 import 'firebase_options.dart';
 
 // ===== Auth =====
@@ -52,6 +53,15 @@ import 'features/conversation/data/repositories/user_repository_impl.dart';
 import 'features/conversation/domain/usecases/fetch_all_user_usecase.dart';
 import 'features/conversation/presentation/blocs/user/users_cubit.dart';
 import 'features/conversation/presentation/blocs/user/users_online_bloc.dart';
+
+// ===== Social =====
+import 'package:chat_app/features/social/data/data_sources/social_remote_data_source.dart';
+import 'package:chat_app/features/social/data/repositories/social_repository_impl.dart';
+import 'package:chat_app/features/social/domain/repositories/social_repository.dart';
+import 'package:chat_app/features/social/domain/usecases/fetch_posts_usecase.dart';
+import 'package:chat_app/features/social/domain/usecases/create_post_usecase.dart';
+import 'package:chat_app/features/social/domain/usecases/delete_post_usecase.dart';
+import 'package:chat_app/features/social/presentation/blocs/posts_cubit.dart';
 
 // ===== Friend (đã có module injection riêng) =====
 import 'features/friend/friend_injection.dart';
@@ -101,38 +111,36 @@ Future<void>  setupDI() async {
   sl.registerLazySingleton<LoadMessageUseCase>(
         () => LoadMessageUseCase(sl<ChatRepositoryImpl>()),
   );
-  // sl.registerLazySingleton<ImagePickerService>(
-  //     () => ImagePickerService()
-  // );
-  // sl.registerLazySingleton<SupabaseStorageService>(
-  //     () => SupabaseStorageService()
-  // );
+  sl.registerLazySingleton<ImagePickerService>(
+      () => ImagePickerService()
+  );
+  sl.registerLazySingleton<SupabaseStorageService>(
+      () => SupabaseStorageService()
+  );
   sl.registerFactory<ChatBloc>(() => ChatBloc(sl<LoadMessageUseCase>()
-       // ,sl<ImagePickerService>(),sl<SupabaseStorageService>()
+       ,sl<ImagePickerService>(),sl<SupabaseStorageService>()
   ));
-  //
-  // sl.registerLazySingleton<PermissionService>(
-  //     () => PermissionService()
-  // );
 
-  // sl.registerLazySingleton<DownloaderService>(
-  //         () => DownloaderService(
-  //           supabase: Supabase.instance.client,
-  //           bucket: 'avatars'
-  //         )
-  // );
+  sl.registerLazySingleton<PermissionService>(
+      () => PermissionService()
+  );
 
-  // sl.registerFactory<ImageSaveCubit>(
-  //         () => ImageSaveCubit(permissionService: sl<PermissionService>(), downloaderService: sl<DownloaderService>())
-  // );
+  sl.registerLazySingleton<DownloaderService>(
+          () => DownloaderService(
+            supabase: Supabase.instance.client,
+            bucket: 'avatars'
+          )
+  );
+
+  sl.registerFactory<ImageSaveCubit>(
+          () => ImageSaveCubit(permissionService: sl<PermissionService>(), downloaderService: sl<DownloaderService>())
+  );
 
 
   sl.registerFactory<OutGoingCallCubit>(() => OutGoingCallCubit(sl<SocketService>()
-    // ,sl<ImagePickerService>(),sl<SupabaseStorageService>()
   ));
 
   sl.registerFactory<InComingCallCubit>(() => InComingCallCubit(sl<SocketService>()
-    // ,sl<ImagePickerService>(),sl<SupabaseStorageService>()
   ));
 
   // ----- Group -----
@@ -168,6 +176,29 @@ Future<void>  setupDI() async {
   );
   sl.registerFactory<UsersCubit>(() => UsersCubit(userUseCase: sl<FetchAllUserUseCase>()));
   sl.registerFactory<UsersOnlineBloc>(() => UsersOnlineBloc(sl<SocketService>()));
+
+  // ----- Social -----
+  final _socialRemote = SocialRemoteDataSource(apiService: sl<ApiService>());
+  sl.registerLazySingleton<SocialRemoteDataSource>(() => _socialRemote);
+  sl.registerLazySingleton<SocialRepository>(() => SocialRepositoryImpl(remoteDataSource: _socialRemote));
+  sl.registerLazySingleton<FetchPostsUseCase>(() => FetchPostsUseCase(sl<SocialRepository>()));
+  sl.registerLazySingleton<CreatePostUseCase>(() => CreatePostUseCase(sl<SocialRepository>()));
+  sl.registerLazySingleton<DeletePostUseCase>(() => DeletePostUseCase(sl<SocialRepository>()));
+  sl.registerLazySingleton<LikePostUseCase>(() => LikePostUseCase(sl<SocialRepository>()));
+  sl.registerFactory<PostsCubit>(() => PostsCubit(
+        fetchPostsUseCase: sl<FetchPostsUseCase>(),
+        createPostUseCase: sl<CreatePostUseCase>(),
+        deletePostUseCase: sl<DeletePostUseCase>(),
+        permissionService: sl<PermissionService>(),
+        imagePickerService: sl<ImagePickerService>(),
+        likePostUseCase: sl<LikePostUseCase>(),
+
+  ));
+  sl.registerFactory<CreatePostsCubit>(() => CreatePostsCubit(
+        createPostUseCase: sl<CreatePostUseCase>(),
+        permissionService: sl<PermissionService>(),
+        imagePickerService: sl<ImagePickerService>(),
+  ));
 
   // ----- Friend module -----
   initFriendDependencies(); // hàm này tự register FriendBloc, repo… vào sl

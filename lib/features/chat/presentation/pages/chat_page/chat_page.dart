@@ -6,6 +6,7 @@ import 'package:chat_app/core/theme/theme_app.dart';
 import 'package:chat_app/core/utils/util.dart';
 import 'package:chat_app/features/chat/presentation/blocs/chat_bloc.dart';
 import 'package:chat_app/features/chat/presentation/widgets/bottom_sheeet_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -59,6 +60,7 @@ class ChatPage extends StatefulWidget {
       chatBloc = context.read<ChatBloc>();
       conversationId = widget.conversationId;
       isGroup = widget.isGroup;
+      Util.conversationIdActive = widget.conversationId;
 
       _controller = TextEditingController();
       avatar = widget.avatar;
@@ -122,7 +124,11 @@ class ChatPage extends StatefulWidget {
                     callID: 'call_${widget.conversationId}_${Util.userId}_${chatBloc.state.replyTo.toString()}',
                     userIdReceiver: chatBloc.state.replyTo.toString(),
                     userName: Util.userName,
+                    conversationId: widget.conversationId,
+
                   );
+
+
                 },
 
               ),
@@ -135,7 +141,7 @@ class ChatPage extends StatefulWidget {
                 child: PagingListener<RequestMessage?, Message>(
                   controller: chatBloc.pagingController,
                   builder: (context, pagingState, fetchNextPage) {
-                    return PagedListView<RequestMessage?, Message>(
+                    return PagedListView<RequestMessage?, Message>.separated(
                       state: pagingState,
                       fetchNextPage: fetchNextPage,
                       reverse: true,
@@ -144,12 +150,12 @@ class ChatPage extends StatefulWidget {
                           final isSender = item.senderId == Util.userId;
                           final isLast = item.id == pagingState.pages?.first?.first?.id;
                           return buildMessageBubble(
-                            Theme.of(context),
-                            item.content,
-                            isSender,
-                            isLast,
-                            item.getStatus(isGroup),
-                            item.messageType
+                              Theme.of(context),
+                              item.content,
+                              isSender,
+                              isLast,
+                              item.getStatus(isGroup),
+                              item.messageType
                           );
                         },
                         firstPageProgressIndicatorBuilder: (context) => const Center(
@@ -157,11 +163,12 @@ class ChatPage extends StatefulWidget {
                         ),
                         newPageProgressIndicatorBuilder: (context) => const Center(
                           child: CircularProgressIndicator(),
-                      ),
+                           ),
                         noItemsFoundIndicatorBuilder: (context) => const Center(
                           child: Text('No messages yet'),
                         ),
                       ),
+                      separatorBuilder: (context, index) => const SizedBox(height: 12)
                     );
                   }
                 ),
@@ -179,21 +186,21 @@ class ChatPage extends StatefulWidget {
   Widget buildMessageBubble(ThemeData theme, String message, bool isSender,bool lastMessage,String status, MessageType messageType) {
     return Align(
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        decoration: BoxDecoration(
-          color: isSender
-              ? DefaultColors.senderMessage.withOpacity(0.3)
-              : DefaultColors.receiverMessage.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(15),
-        ),
         child: Column(
           crossAxisAlignment: isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children:[
-            contentMessage(messageType,message,theme),
+            Container(
+                decoration: BoxDecoration(
+                    color: isSender
+                        ? DefaultColors.senderMessage.withOpacity(0.3)
+                        : DefaultColors.receiverMessage.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(15)),
+                child: contentMessage(messageType,message,theme)
+            ),
 
-            if (lastMessage && isSender) // Hiển thị replyTo chỉ cho tin nhắn cuối cùng
+            if (lastMessage && isSender && messageType != MessageType.video) // Hiển thị replyTo chỉ cho tin nhắn cuối cùng
                 Padding(
-                  padding: const EdgeInsets.only(top: 5,right: 5),
+                  padding: const EdgeInsets.only(right: 8.0,left: 8.0, bottom: 7.0),
                   child: Text(
                     status,
                     style: TextStyle(fontSize: 12, color: Colors.white70),
@@ -201,7 +208,6 @@ class ChatPage extends StatefulWidget {
                 ),
           ]
         ),
-      ),
     );
   }
 
@@ -216,14 +222,14 @@ class ChatPage extends StatefulWidget {
         children: [
           IconButton(
             onPressed: (){
-              // _sendImageMessage(
-              //     widget.conversationId,
-              //     'image message',
-              //     Util.userId,
-              //     MessageType.image,
-              //     replyTo,
-              //     widget.isGroup
-              // );
+              _sendImageMessage(
+                  widget.conversationId,
+                  'image message',
+                  Util.userId,
+                  MessageType.image,
+                  replyTo,
+                  widget.isGroup
+              );
             },
             icon: const Icon(Icons.camera_alt_outlined, color: Colors.white70),
           ),
@@ -275,12 +281,12 @@ class ChatPage extends StatefulWidget {
   }
 
   void _sendMessage(int conversationId, String content, int senderId,MessageType messageType,int? replyTo,bool isGroup) {
-    context.read<ChatBloc>().add(
-      MessageSendEvent(conversationId: conversationId, content: content, messageType: messageType,replyTo: replyTo, isGroup: isGroup)
-    );
 
-
-
+      if(content.trim().isNotEmpty){
+        context.read<ChatBloc>().add(
+            MessageSendEvent(conversationId: conversationId, content: content, messageType: messageType,replyTo: replyTo, isGroup: isGroup)
+        );
+      }
   }
 
   @override
@@ -298,16 +304,16 @@ class ChatPage extends StatefulWidget {
 
 
     void _sendImageMessage(int conversationId, String content, int senderId,MessageType messageType,int? replyTo,bool isGroup) {
-      // context.read<ChatBloc>().add(
-      //     // SendImageMessage(
-      //     //     imagePath: '',
-      //     //     conversationId: conversationId,
-      //     //     content: content,
-      //     //     messageType: messageType,
-      //     //     replyTo: replyTo,
-      //     //     isGroup: isGroup
-      //     // )
-      // );
+      context.read<ChatBloc>().add(
+          SendImageMessage(
+              imagePath: '',
+              conversationId: conversationId,
+              content: content,
+              messageType: messageType,
+              replyTo: replyTo,
+              isGroup: isGroup
+          )
+      );
 
     }
 
@@ -331,8 +337,8 @@ class ChatPage extends StatefulWidget {
                borderRadius: BorderRadius.circular(12),
                child: CachedNetworkImage(
                  imageUrl: message,
-                 width: getWidth(context)*0.2,
-                 height: getWidth(context)*0.15,
+                 width: kIsWeb ? getWidth(context)*0.25 : getWidth(context)*0.4,
+                 height: kIsWeb ? getWidth(context)*0.25 : getWidth(context)*0.35,
                  fit: BoxFit.cover,
                  placeholder: (context, url) => const Center(
                    child: CircularProgressIndicator(),
@@ -347,9 +353,22 @@ class ChatPage extends StatefulWidget {
            ),
          );
 
-      } else {
-        return const SizedBox.shrink(); // Trả về một widget rỗng nếu không phải text hoặc image
+      } else if(messageType == MessageType.video) {
+        return Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const Icon(Icons.videocam, color: Colors.white70),
+              const SizedBox(height: 8),
+              Text(message, style: theme.textTheme.bodyMedium),
+            ],
+          ),
+        );
       }
+
+      return SizedBox.shrink();
     }
 
 
@@ -358,8 +377,10 @@ class ChatPage extends StatefulWidget {
       return uri != null && (uri.isScheme('http') || uri.isScheme('https')) && uri.host.isNotEmpty;
     }
 
-  void navigateToVideoCallPage({required String callID, required String userIdReceiver, required String userName}) {
-      debugPrint('infor navigate to video call page: callID=$callID, userID=$userIdReceiver, userName=$userName');
+  void navigateToVideoCallPage({required String callID, required String userIdReceiver,
+    required String userName,required int conversationId}) {
+      debugPrint('infor navigate to outGoingCallName page: callID=$callID, '
+          'userID=$userIdReceiver, userName=$userName');
       context.pushNamed(
         AppRouteInfor.outGoingCallName,
         pathParameters: {
@@ -368,14 +389,13 @@ class ChatPage extends StatefulWidget {
         queryParameters: {
           'userIdReceiver': userIdReceiver,
           'usernameReceiver': userName,
-          'avatarUrl': avatar ?? ''
+          'avatarUrl': avatar ?? '',
+          'conversationId': conversationId.toString()
         },
       );
   }
+
+
 }
-
-
-
-
 
 
