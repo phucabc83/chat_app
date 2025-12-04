@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/core/consts/const.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/post.dart';
+import '../blocs/posts_cubit.dart';
 
 class PostItem extends StatelessWidget {
   final Post post;
@@ -24,22 +26,20 @@ class PostItem extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       color: Colors.blueAccent.withOpacity(0.15),
       child: Padding(
-        padding: EdgeInsets.only(top: 10 ,bottom: 5),
+        padding: EdgeInsets.only(top: 10, bottom: 5),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
-                mainAxisAlignment : MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                    CircleAvatar(
-                      radius: 25,
-                      backgroundImage: NetworkImage(
-                        post.avatarUrl,
-                      ),
-                    ),
+                  CircleAvatar(
+                    radius: 25,
+                    backgroundImage: NetworkImage(post.avatarUrl),
+                  ),
                   SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,32 +48,30 @@ class PostItem extends StatelessWidget {
                         padding: const EdgeInsets.only(left: 8.0),
                         child: Text(
                           post.username,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          )
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
                       ),
-                    ),
                       Padding(
                         padding: const EdgeInsets.only(left: 8.0),
                         child: Text(
                           _timeAgo(post.createdAt),
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: Colors.grey,
-                              fontSize: 12,
-                            )
-
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(color: Colors.grey, fontSize: 12),
                         ),
                       ),
                     ],
                   ),
                   Expanded(
                     child: Align(
-                      alignment:Alignment.topRight,
-                      child: Icon(Icons.more_horiz_outlined,color: Colors.cyanAccent,),
+                      alignment: Alignment.topRight,
+                      child: Icon(
+                        Icons.more_horiz_outlined,
+                        color: Colors.cyanAccent,
+                      ),
                     ),
-                  )
-
-                  ]
+                  ),
+                ],
               ),
             ),
             Padding(
@@ -89,30 +87,58 @@ class PostItem extends StatelessWidget {
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: 200,
-              )
-              ],
+              ),
+            ],
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 TextButton.icon(
-                  onPressed: () {},
-                  icon: Icon(Icons.favorite_outline, color: Colors.white54,size: 25,),
-                  label: Text('Thích', style: TextStyle(color: Colors.white54),),
+                  onPressed: post.isLiked
+                      ? () {}
+                      : () => context.read<PostsCubit>().likePost(
+                          int.parse(post.id),
+                        ),
+                  icon: post.isLiked ? Icon(
+                    Icons.favorite,
+                    color:Colors.redAccent ,
+                    size: 25,
+                  ):  Icon(
+                    Icons.favorite_outline,
+                    color:Colors.white54,
+                    size: 25,
+                  ),
+                  label: Text(
+                    '${post.likeCount != 0 ? post.likeCount : ''} Thích',
+                    style: TextStyle(color: Colors.white54),
+                  ),
                 ),
                 TextButton.icon(
                   onPressed: () {},
-                  icon: Icon(Icons.comment_outlined, color: Colors.white54,size: 25,),
-                  label: Text('Bình luận', style: TextStyle(color: Colors.white54),),
+                  icon: Icon(
+                    Icons.comment_outlined,
+                    color: Colors.white54,
+                    size: 25,
+                  ),
+                  label: Text(
+                    'Bình luận',
+                    style: TextStyle(color: Colors.white54),
+                  ),
                 ),
                 TextButton.icon(
                   onPressed: () {},
-                  icon: Icon(Icons.share_outlined, color: Colors.white54,size: 25,),
-                  label: Text('Chia sẽ', style: TextStyle(color: Colors.white54),),
-                )
-              ]
-            )
+                  icon: Icon(
+                    Icons.share_outlined,
+                    color: Colors.white54,
+                    size: 25,
+                  ),
+                  label: Text(
+                    'Chia sẽ',
+                    style: TextStyle(color: Colors.white54),
+                  ),
+                ),
+              ],
+            ),
           ],
-
         ),
       ),
     );

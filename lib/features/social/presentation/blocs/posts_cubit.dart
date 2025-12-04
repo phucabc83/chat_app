@@ -1,5 +1,7 @@
+
 import 'package:chat_app/core/permissions/permission_service.dart';
 import 'package:chat_app/core/service/image_picker_service.dart';
+import 'package:chat_app/features/social/domain/usecases/like_post_usecase.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,6 +15,7 @@ import '../../domain/usecases/delete_post_usecase.dart';
 class PostsCubit extends Cubit<PostsState> {
   final FetchPostsUseCase fetchPostsUseCase;
   final CreatePostUseCase createPostUseCase;
+  final LikePostUseCase likePostUseCase;
   final DeletePostUseCase deletePostUseCase;
   final PermissionService permissionService;
   final ImagePickerService imagePickerService;
@@ -24,6 +27,7 @@ class PostsCubit extends Cubit<PostsState> {
     required this.deletePostUseCase,
     required this.permissionService,
     required this.imagePickerService,
+    required this.likePostUseCase,
   }) : super(const PostsState());
 
   Future<void> loadPosts() async {
@@ -37,6 +41,18 @@ class PostsCubit extends Cubit<PostsState> {
       emit(state.copyWith(loading: false, posts: posts));
     } catch (e) {
       emit(state.copyWith(loading: false, error: e.toString()));
+    }
+  }
+
+  Future<void> likePost(int postId) async {
+    try {
+      await  likePostUseCase.call(postId);
+      final post = state.posts.firstWhere((post) => postId == int.parse(post.id));
+      post.likeCount++;
+      emit(state);
+
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
     }
   }
 

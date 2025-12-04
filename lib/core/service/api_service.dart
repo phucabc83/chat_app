@@ -5,7 +5,6 @@ import 'package:chat_app/features/chat/domain/repositories/chat_repository.dart'
 import 'package:chat_app/features/chat/presentation/pages/chat_page/chat_page.dart';
 import 'package:chat_app/features/conversation/data/models/avatar_model.dart';
 import 'package:chat_app/features/conversation/data/models/conversation_model.dart';
-import 'package:chat_app/features/friend/domain/entities/friend.dart';
 import 'package:chat_app/features/social/data/models/post_model.dart';
 import 'package:dio/dio.dart';
 import 'package:chat_app/core/utils/util.dart';
@@ -658,6 +657,35 @@ class ApiService {
           .toList();
 
       return posts;
+
+    } on DioException catch (e) {
+      print('Dio ERROR   ← ${e.response?.statusCode} ${e.requestOptions.uri}');
+      throw Exception('Failed to create post: ${e.toString()}');
+    }
+  }
+
+  Future<bool> addLikeForPost({required int postId}) async {
+
+    String token = await _storage.read(key: 'token') ?? '';
+    final endpoint = '/posts/$postId/like';
+    final url = '${dio.options.baseUrl}$endpoint';
+    print('Dio REQUEST → POST $url');
+    try {
+
+      final res = await dio.post(
+          endpoint,
+          queryParameters: {
+            'userId':Util.userId
+          },
+          options: Options(
+              headers: {
+                'Authorization': 'Bearer $token'
+              }
+          )
+      );
+
+      print('Dio RESPONSE ← ${res.statusCode} ${res.requestOptions.uri}');
+      return true;
 
     } on DioException catch (e) {
       print('Dio ERROR   ← ${e.response?.statusCode} ${e.requestOptions.uri}');

@@ -46,6 +46,8 @@ class _PostsPageState extends State<PostsPage> {
 
               }
 
+            print('item last ${state.posts.last}');
+
 
               return ListView.separated(
                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),

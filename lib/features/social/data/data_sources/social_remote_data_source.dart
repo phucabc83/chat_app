@@ -26,5 +26,13 @@ class SocialRemoteDataSource {
   Future<void> deletePost(String id) async {
     await apiService.dio.delete('/posts/$id');
   }
+  Future<bool> likePost(int postId) async {
+    try {
+      return await apiService.addLikeForPost(postId: postId);
+    } catch (e) {
+      print('Error liking post: $e');
+      return false;
+    }
+  }
 }
 

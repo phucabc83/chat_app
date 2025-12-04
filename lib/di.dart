@@ -15,6 +15,7 @@ import 'core/service/fcm_service.dart';
 import 'core/service/socket_service.dart';
 import 'core/theme/theme_app.dart';
 import 'features/chat/presentation/blocs/in_coming_call_cubit.dart';
+import 'features/social/domain/usecases/like_post_usecase.dart';
 import 'firebase_options.dart';
 
 // ===== Auth =====
@@ -183,12 +184,14 @@ Future<void>  setupDI() async {
   sl.registerLazySingleton<FetchPostsUseCase>(() => FetchPostsUseCase(sl<SocialRepository>()));
   sl.registerLazySingleton<CreatePostUseCase>(() => CreatePostUseCase(sl<SocialRepository>()));
   sl.registerLazySingleton<DeletePostUseCase>(() => DeletePostUseCase(sl<SocialRepository>()));
+  sl.registerLazySingleton<LikePostUseCase>(() => LikePostUseCase(sl<SocialRepository>()));
   sl.registerFactory<PostsCubit>(() => PostsCubit(
         fetchPostsUseCase: sl<FetchPostsUseCase>(),
         createPostUseCase: sl<CreatePostUseCase>(),
         deletePostUseCase: sl<DeletePostUseCase>(),
         permissionService: sl<PermissionService>(),
         imagePickerService: sl<ImagePickerService>(),
+        likePostUseCase: sl<LikePostUseCase>(),
 
   ));
   sl.registerFactory<CreatePostsCubit>(() => CreatePostsCubit(

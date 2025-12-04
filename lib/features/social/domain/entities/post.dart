@@ -9,8 +9,10 @@ class Post extends Equatable {
   final String visibility;
   final String avatarUrl;
   final DateTime createdAt;
+  late  int likeCount;
+  late bool isLiked ;
 
-  const Post({
+   Post({
     required this.id,
     required this.authorId,
     required this.content,
@@ -18,10 +20,12 @@ class Post extends Equatable {
     required this.visibility,
     required this.createdAt,
     required this.username,
-    required this.avatarUrl
+    required this.avatarUrl,
+    this.likeCount = 0,
+     required this.isLiked,
   });
 
   @override
-  List<Object?> get props => [id, authorId, content, imageUrl, createdAt,username,avatarUrl];
+  List<Object?> get props => [id, authorId, content, imageUrl, createdAt,username,avatarUrl,likeCount ,isLiked];
 }
 

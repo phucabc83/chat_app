@@ -3,7 +3,7 @@ import '../../domain/entities/post.dart';
 class PostModel extends Post {
 
 
-  const PostModel({
+   PostModel({
     required super.id,
     required super.authorId,
     required super.content,
@@ -12,6 +12,9 @@ class PostModel extends Post {
     super.visibility = 'public',
     required super.username,
     required super.avatarUrl,
+    required super.likeCount,
+    required super.isLiked,
+
   });
 
 
@@ -28,6 +31,8 @@ class PostModel extends Post {
               : DateTime.now(),
           username: json['name'] as String? ?? 'Unknown',
           avatarUrl: json['avatar_url'] as String? ?? '',
+        likeCount: json['like_count'] as int? ?? 0,
+        isLiked: json['is_liked']== 1,
       );
     }catch(e){
       throw Exception('Error parsing PostModel: $e');
@@ -55,6 +60,8 @@ class PostModel extends Post {
         createdAt: post.createdAt,
         username: post.username,
         avatarUrl: post.avatarUrl,
+        likeCount: post.likeCount,
+        isLiked: post.isLiked,
       );
     }catch(e){
       throw Exception('Error converting Post to PostModel: $e');

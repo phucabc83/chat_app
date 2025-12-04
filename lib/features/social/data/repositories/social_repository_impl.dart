@@ -32,4 +32,9 @@ class SocialRepositoryImpl implements SocialRepository {
   Future<void> deletePost(String id) async {
     await remoteDataSource.deletePost(id);
   }
+
+  @override
+  Future<bool> likePost(int postId) async {
+      return await remoteDataSource.likePost(postId);
+  }
 }
