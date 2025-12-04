@@ -7,7 +7,7 @@ class PermissionService{
     final checkPermission = await checkStoragePermission();
     if(checkPermission) return true;
     if (Platform.isAndroid) {
-      final status = await Permission.storage.request();
+        final status = await Permission.storage.request();
       return status.isGranted;
     }
     return true; // iOS không có storage permission

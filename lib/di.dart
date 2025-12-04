@@ -4,6 +4,7 @@ import 'package:chat_app/core/service/image_picker_service.dart';
 import 'package:chat_app/core/service/supabase_storage_service.dart';
 import 'package:chat_app/features/chat/presentation/blocs/image_save_cubit.dart';
 import 'package:chat_app/features/chat/presentation/blocs/out_going_call_cubit.dart';
+import 'package:chat_app/features/social/presentation/blocs/create_posts_cubit.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -186,6 +187,14 @@ Future<void>  setupDI() async {
         fetchPostsUseCase: sl<FetchPostsUseCase>(),
         createPostUseCase: sl<CreatePostUseCase>(),
         deletePostUseCase: sl<DeletePostUseCase>(),
+        permissionService: sl<PermissionService>(),
+        imagePickerService: sl<ImagePickerService>(),
+
+  ));
+  sl.registerFactory<CreatePostsCubit>(() => CreatePostsCubit(
+        createPostUseCase: sl<CreatePostUseCase>(),
+        permissionService: sl<PermissionService>(),
+        imagePickerService: sl<ImagePickerService>(),
   ));
 
   // ----- Friend module -----

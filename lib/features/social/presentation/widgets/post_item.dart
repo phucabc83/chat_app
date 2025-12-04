@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat_app/core/consts/const.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/post.dart';
@@ -10,75 +11,108 @@ class PostItem extends StatelessWidget {
 
   String _timeAgo(DateTime dt) {
     final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 1) return 'just now';
-    if (diff.inHours < 1) return '${diff.inMinutes}m';
-    if (diff.inDays < 1) return '${diff.inHours}h';
-    return '${diff.inDays}d';
+    if (diff.inMinutes < 1) return 'bây giờ';
+    if (diff.inHours < 1) return '${diff.inMinutes} phút';
+    if (diff.inDays < 1) return '${diff.inHours} giờ';
+    return '${diff.inDays} ngày';
   }
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      color: Colors.blueAccent.withOpacity(0.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      color: Colors.blueAccent.withOpacity(0.15),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: EdgeInsets.only(top: 10 ,bottom: 5),
         child: Column(
-          
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.grey.shade300,
-                  child: Text(post.authorId.replaceAll('user_', 'U')),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment : MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                    CircleAvatar(
+                      radius: 25,
+                      backgroundImage: NetworkImage(
+                        post.avatarUrl,
+                      ),
+                    ),
+                  SizedBox(width: 10),
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('User ${post.authorId}', style: const TextStyle(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 2),
-                      Text(_timeAgo(post.createdAt), style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Text(
+                          post.username,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          )
+                      ),
+                    ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Text(
+                          _timeAgo(post.createdAt),
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            )
+
+                        ),
+                      ),
                     ],
                   ),
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.more_horiz),
-                )
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(post.content, style: const TextStyle(fontSize: 15)),
-            if (post.imageUrl != null) ...[
-              const SizedBox(height: 10),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: CachedNetworkImage(
-                  imageUrl: post.imageUrl!,
-                  fit: BoxFit.cover,
-                  height: 180,
-                  width: double.infinity,
-                  placeholder: (c, s) => Container(height: 180, color: Colors.grey.shade200),
-                  errorWidget: (c, s, e) => Container(height: 180, color: Colors.grey.shade200, child: const Icon(Icons.broken_image)),
-                ),
+                  Expanded(
+                    child: Align(
+                      alignment:Alignment.topRight,
+                      child: Icon(Icons.more_horiz_outlined,color: Colors.cyanAccent,),
+                    ),
+                  )
+
+                  ]
               ),
-            ],
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                IconButton(onPressed: () {}, icon: const Icon(Icons.thumb_up_alt_outlined)),
-                const SizedBox(width: 6),
-                IconButton(onPressed: () {}, icon: const Icon(Icons.comment_outlined)),
-                const Spacer(),
-                Text('${post.createdAt.toLocal()}'.split(' ')[0], style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                post.content,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+            if (post.imageUrl != null) ...[
+              Image(
+                image: CachedNetworkImageProvider(post.imageUrl!),
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 200,
+              )
               ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                TextButton.icon(
+                  onPressed: () {},
+                  icon: Icon(Icons.favorite_outline, color: Colors.white54,size: 25,),
+                  label: Text('Thích', style: TextStyle(color: Colors.white54),),
+                ),
+                TextButton.icon(
+                  onPressed: () {},
+                  icon: Icon(Icons.comment_outlined, color: Colors.white54,size: 25,),
+                  label: Text('Bình luận', style: TextStyle(color: Colors.white54),),
+                ),
+                TextButton.icon(
+                  onPressed: () {},
+                  icon: Icon(Icons.share_outlined, color: Colors.white54,size: 25,),
+                  label: Text('Chia sẽ', style: TextStyle(color: Colors.white54),),
+                )
+              ]
             )
           ],
+
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:chat_app/core/permissions/permission_service.dart';
 import 'package:chat_app/core/service/image_picker_service.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/post.dart';
@@ -27,24 +28,19 @@ class PostsCubit extends Cubit<PostsState> {
 
   Future<void> loadPosts() async {
     try {
+      debugPrint('🟢 [PostsCubit] Loading posts...');
       emit(state.copyWith(loading: true, error: null));
       final posts = await fetchPostsUseCase.execute();
+      print('data load posts: $posts');
+
+
       emit(state.copyWith(loading: false, posts: posts));
     } catch (e) {
       emit(state.copyWith(loading: false, error: e.toString()));
     }
   }
 
-  Future<void> addPost({required String content, String? imageUrl}) async {
-    try {
-      emit(state.copyWith(submitting: true, error: null));
-      final post = await createPostUseCase.execute(content: content, imageUrl: imageUrl);
-      final updated = [post, ...state.posts];
-      emit(state.copyWith(submitting: false, posts: updated));
-    } catch (e) {
-      emit(state.copyWith(submitting: false, error: e.toString()));
-    }
-  }
+
 
   Future<void> removePost(String id) async {
     try {
@@ -56,6 +52,13 @@ class PostsCubit extends Cubit<PostsState> {
     }
   }
   Future<void> chooseImage() async {
+      var granted = await permissionService.requestPhotoPermission();
+      if(!granted){
+        state.copyWith(
+          error: 'Storage permission denied.',
+        );
+      }
+      final imageData = await imagePickerService.pickImage();
 
   }
 }

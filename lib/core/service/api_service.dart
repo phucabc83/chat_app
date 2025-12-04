@@ -1,9 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:chat_app/features/auth/domain/entities/user.dart';
 import 'package:chat_app/features/chat/domain/repositories/chat_repository.dart';
 import 'package:chat_app/features/chat/presentation/pages/chat_page/chat_page.dart';
 import 'package:chat_app/features/conversation/data/models/avatar_model.dart';
 import 'package:chat_app/features/conversation/data/models/conversation_model.dart';
 import 'package:chat_app/features/friend/domain/entities/friend.dart';
+import 'package:chat_app/features/social/data/models/post_model.dart';
 import 'package:dio/dio.dart';
 import 'package:chat_app/core/utils/util.dart';
 import 'package:chat_app/features/auth/data/models/user_model.dart';
@@ -581,6 +584,84 @@ class ApiService {
     } on DioException catch (e) {
       print('Dio ERROR   ← ${e.response?.statusCode} ${e.requestOptions.uri}');
       throw Exception('Failed to update Token FCM: ${e.toString()}');
+    }
+  }
+
+  Future<PostModel> createPost({required String content, Uint8List? fileBytes,String? fileNameImage,String? mimeType}) async {
+
+    String token = await _storage.read(key: 'token') ?? '';
+    final endpoint = '/posts';
+    final url = '${dio.options.baseUrl}$endpoint';
+    print('Dio REQUEST → POST $url');
+    try {
+      print(
+          'Creating post with content: $content, fileNameImage: $fileNameImage, mimeType: $mimeType'
+      );
+      FormData formData = FormData.fromMap({
+        'userId': Util.userId,
+        'content': content,
+        if (fileBytes != null)
+          'file': MultipartFile.fromBytes(
+            fileBytes,
+            filename: fileNameImage,
+            contentType: mimeType != null ? DioMediaType.parse(mimeType) : null,
+          ),
+      });
+
+      final res = await dio.post(
+          endpoint,
+          data: formData,
+          options: Options(
+              headers: {
+                'Authorization': 'Bearer $token'
+              }
+          )
+      );
+
+      print('Dio RESPONSE ← ${res.statusCode} ${res.requestOptions.uri}');
+      print('data post: ${res.data['data']}');
+      return PostModel.fromJson(res.data['data']);
+
+    } on DioException catch (e) {
+      print('Dio ERROR   ← ${e.response?.statusCode} ${e.requestOptions.uri}');
+      throw Exception('Failed to create post: ${e.toString()}');
+    }
+  }
+
+  Future<List<PostModel>> getPosts() async {
+
+    String token = await _storage.read(key: 'token') ?? '';
+    final endpoint = '/posts';
+    final url = '${dio.options.baseUrl}$endpoint';
+    print('Dio REQUEST → GET $url');
+    try {
+
+
+      final res = await dio.get(
+          endpoint,
+          queryParameters: {
+            'userId':Util.userId
+          },
+          options: Options(
+              headers: {
+                'Authorization': 'Bearer $token'
+              }
+          )
+      );
+
+      print('Dio RESPONSE ← ${res.statusCode} ${res.requestOptions.uri}');
+      print('get data posts: ${res.data}');
+      final data = res.data ;
+      final list = data as List;
+      final posts = list
+          .map<PostModel>((e) => PostModel.fromJson(e))
+          .toList();
+
+      return posts;
+
+    } on DioException catch (e) {
+      print('Dio ERROR   ← ${e.response?.statusCode} ${e.requestOptions.uri}');
+      throw Exception('Failed to create post: ${e.toString()}');
     }
   }
 

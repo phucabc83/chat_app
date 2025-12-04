@@ -6,6 +6,7 @@ import 'package:chat_app/features/chat/presentation/pages/video_call_page/incomi
 import 'package:chat_app/features/chat/presentation/pages/video_call_page/out_going_call_screen.dart';
 import 'package:chat_app/features/chat/presentation/pages/video_call_page/video_call_page.dart';
 import 'package:chat_app/features/conversation/presentation/pages/home_main_page.dart';
+import 'package:chat_app/features/social/presentation/blocs/create_posts_cubit.dart';
 import 'package:chat_app/features/social/presentation/blocs/posts_cubit.dart';
 import 'package:chat_app/features/social/presentation/pages/create_post_page.dart';
 import 'package:flutter/cupertino.dart';
@@ -155,7 +156,7 @@ class RouterApp {
         path: AppRouteInfor.createPostPath,
         name: AppRouteInfor.createPostName,
         builder: (_, _) => BlocProvider(
-          create: (context) => sl<PostsCubit>(),
+          create: (context) => sl<CreatePostsCubit>(),
           child: const CreatePostPage(),
         ),
       ),
