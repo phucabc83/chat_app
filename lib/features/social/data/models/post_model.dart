@@ -21,7 +21,7 @@ class PostModel extends Post {
   factory PostModel.fromJson(Map<String, dynamic> json) {
     try{
       return PostModel(
-        id: json['id'].toString(),
+        id: json['id'],
         authorId: json['author_id'].toString(),
         content: json['content'] as String? ?? '',
         imageUrl: json['image_url'] as String?,
@@ -32,7 +32,7 @@ class PostModel extends Post {
           username: json['name'] as String? ?? 'Unknown',
           avatarUrl: json['avatar_url'] as String? ?? '',
         likeCount: json['like_count'] as int? ?? 0,
-        isLiked: json['is_liked']== 1,
+        isLiked: json['is_liked']== null ? false : json['is_liked'] == 1,
       );
     }catch(e){
       throw Exception('Error parsing PostModel: $e');
@@ -66,6 +66,20 @@ class PostModel extends Post {
     }catch(e){
       throw Exception('Error converting Post to PostModel: $e');
     }
+  }
+  Post toEntity() {
+    return Post(
+      id: id,
+      authorId: authorId,
+      content: content,
+      imageUrl: imageUrl,
+      visibility: visibility,
+      createdAt: createdAt,
+      username: username,
+      avatarUrl: avatarUrl,
+      likeCount: likeCount,
+      isLiked: isLiked,
+    );
   }
 
 }

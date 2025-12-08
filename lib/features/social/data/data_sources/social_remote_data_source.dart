@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:chat_app/core/service/api_service.dart';
+import 'package:chat_app/features/social/data/models/comment_model.dart';
+import 'package:chat_app/features/social/domain/entities/comment.dart';
 import '../models/post_model.dart';
 
 class SocialRemoteDataSource {
@@ -32,6 +34,25 @@ class SocialRemoteDataSource {
     } catch (e) {
       print('Error liking post: $e');
       return false;
+    }
+  }
+
+  Future<CommentModel> commentPost(int postId, String content) async {
+    try {
+      return await apiService.addCommentToPost(postId: postId, content: content);
+    } catch (e) {
+      print('Error commenting on post: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<CommentModel>> fetchComments({required int postId}) async {
+    try {
+      final comments = await apiService.getCommentsForPost(postId: postId);
+      return comments;
+    } catch (e) {
+      print('Error fetching comments: $e');
+      rethrow;
     }
   }
 }

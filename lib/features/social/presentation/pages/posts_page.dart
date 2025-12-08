@@ -37,6 +37,7 @@ class _PostsPageState extends State<PostsPage> {
         body: BlocBuilder<PostsCubit,PostsState>(
           builder: (context, state) {
 
+            print('posts state: $state');
             if(state.loading){
                 return Center(
                   child: CircularProgressIndicator(

@@ -4,6 +4,7 @@ import 'package:chat_app/core/service/image_picker_service.dart';
 import 'package:chat_app/core/service/supabase_storage_service.dart';
 import 'package:chat_app/features/chat/presentation/blocs/image_save_cubit.dart';
 import 'package:chat_app/features/chat/presentation/blocs/out_going_call_cubit.dart';
+import 'package:chat_app/features/social/presentation/blocs/comments_action_cubit.dart';
 import 'package:chat_app/features/social/presentation/blocs/create_posts_cubit.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
@@ -15,7 +16,10 @@ import 'core/service/fcm_service.dart';
 import 'core/service/socket_service.dart';
 import 'core/theme/theme_app.dart';
 import 'features/chat/presentation/blocs/in_coming_call_cubit.dart';
+import 'features/social/domain/usecases/create_comment_usecase.dart';
+import 'features/social/domain/usecases/fetch_comments_usecase.dart';
 import 'features/social/domain/usecases/like_post_usecase.dart';
+import 'features/social/presentation/blocs/comments_cubit.dart';
 import 'firebase_options.dart';
 
 // ===== Auth =====
@@ -187,17 +191,25 @@ Future<void>  setupDI() async {
   sl.registerLazySingleton<LikePostUseCase>(() => LikePostUseCase(sl<SocialRepository>()));
   sl.registerFactory<PostsCubit>(() => PostsCubit(
         fetchPostsUseCase: sl<FetchPostsUseCase>(),
-        createPostUseCase: sl<CreatePostUseCase>(),
-        deletePostUseCase: sl<DeletePostUseCase>(),
-        permissionService: sl<PermissionService>(),
-        imagePickerService: sl<ImagePickerService>(),
         likePostUseCase: sl<LikePostUseCase>(),
-
+        socketService: sl<SocketService>(),
   ));
+
   sl.registerFactory<CreatePostsCubit>(() => CreatePostsCubit(
         createPostUseCase: sl<CreatePostUseCase>(),
         permissionService: sl<PermissionService>(),
         imagePickerService: sl<ImagePickerService>(),
+  ));
+
+  sl.registerSingleton<CreateCommentUseCase>(CreateCommentUseCase(sl<SocialRepository>()));
+  sl.registerSingleton<FetchCommentsUsecase>(FetchCommentsUsecase(sl<SocialRepository>()));
+
+  sl.registerFactory<CommentsActionCubit>(() => CommentsActionCubit(
+    sl<CreateCommentUseCase>()
+  ));
+  sl.registerFactory<CommentsCubit>(() => CommentsCubit(
+      sl<FetchCommentsUsecase>(),
+      sl<SocketService>()
   ));
 
   // ----- Friend module -----

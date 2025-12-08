@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/core/consts/const.dart';
+import 'package:chat_app/features/social/presentation/widgets/bottom_sheet_comment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -54,12 +55,21 @@ class PostItem extends StatelessWidget {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 8.0),
-                        child: Text(
-                          _timeAgo(post.createdAt),
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(color: Colors.grey, fontSize: 12),
+                        child: Builder(
+                          builder: (context) {
+                            final timeText = _timeAgo(post.createdAt);
+                            final isNow = timeText.toLowerCase() == 'bây giờ';
+                            return Text(
+                              timeText,
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: isNow ? Colors.green : Colors.grey, // nổi bật khi bây giờ
+                                fontWeight: isNow ? FontWeight.bold : FontWeight.normal,
+                                fontSize: isNow ? 14 : 12, // tăng size nếu muốn
+                              ),
+                            );
+                          },
                         ),
-                      ),
+                      )
                     ],
                   ),
                   Expanded(
@@ -96,7 +106,7 @@ class PostItem extends StatelessWidget {
                   onPressed: post.isLiked
                       ? () {}
                       : () => context.read<PostsCubit>().likePost(
-                          int.parse(post.id),
+                    post.id,
                         ),
                   icon: post.isLiked ? Icon(
                     Icons.favorite,
@@ -113,7 +123,7 @@ class PostItem extends StatelessWidget {
                   ),
                 ),
                 TextButton.icon(
-                  onPressed: () {},
+                  onPressed:  () =>  showCommentBottomSheet(context: context, postId: post.id,likeCount: post.likeCount),
                   icon: Icon(
                     Icons.comment_outlined,
                     color: Colors.white54,

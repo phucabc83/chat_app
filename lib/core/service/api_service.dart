@@ -5,6 +5,7 @@ import 'package:chat_app/features/chat/domain/repositories/chat_repository.dart'
 import 'package:chat_app/features/chat/presentation/pages/chat_page/chat_page.dart';
 import 'package:chat_app/features/conversation/data/models/avatar_model.dart';
 import 'package:chat_app/features/conversation/data/models/conversation_model.dart';
+import 'package:chat_app/features/social/data/models/comment_model.dart';
 import 'package:chat_app/features/social/data/models/post_model.dart';
 import 'package:dio/dio.dart';
 import 'package:chat_app/core/utils/util.dart';
@@ -598,6 +599,8 @@ class ApiService {
       );
       FormData formData = FormData.fromMap({
         'userId': Util.userId,
+        'userName': Util.userName,
+        'avatarUrl': Util.avatarUrl,
         'content': content,
         if (fileBytes != null)
           'file': MultipartFile.fromBytes(
@@ -690,6 +693,73 @@ class ApiService {
     } on DioException catch (e) {
       print('Dio ERROR   ← ${e.response?.statusCode} ${e.requestOptions.uri}');
       throw Exception('Failed to create post: ${e.toString()}');
+    }
+  }
+
+  Future<CommentModel> addCommentToPost({required int postId, required String content}) async {
+    String token = await _storage.read(key: 'token') ?? '';
+    final endpoint = '/posts/$postId/comments';
+    final url = '${dio.options.baseUrl}$endpoint';
+    print('Dio REQUEST → POST $url');
+    try {
+
+      final res = await dio.post(
+          endpoint,
+          data: {
+            'userId':Util.userId,
+            'content':content,
+            'username': Util.userName,
+            'avatarUrl': Util.avatarUrl,
+          },
+          options: Options(
+              headers: {
+                'Authorization': 'Bearer $token'
+              }
+          )
+      );
+
+      print('Dio RESPONSE ← ${res.statusCode} ${res.requestOptions.uri}');
+
+      return CommentModel.fromJson(res.data['data']);
+
+    } on DioException catch (e) {
+      print('Dio ERROR   ← ${e.response?.statusCode} ${e.requestOptions.uri}');
+      throw Exception('Failed to create post: ${e.toString()}');
+    }
+  }
+
+
+  Future<List<CommentModel>> getCommentsForPost({required int postId}) async {
+    String token = await _storage.read(key: 'token') ?? '';
+    final endpoint = '/posts/$postId/comments';
+    final url = '${dio.options.baseUrl}$endpoint';
+    print('Dio REQUEST → GET $url');
+
+
+    try {
+      final res = await dio.get(
+          endpoint,
+          options: Options(
+              headers: {
+                'Authorization': 'Bearer $token'
+              }
+          )
+      );
+
+      print('Dio RESPONSE ← ${res.statusCode} ${res.requestOptions.uri}');
+      print('get data comment in post: ${res.data}');
+
+
+      final data = res.data;
+      final list = data as List;
+      final comments = list
+          .map<CommentModel>((e) => CommentModel.fromJson(e))
+          .toList();
+
+      return comments;
+    }catch(e) {
+      print('Dio ERROR   ← ${e.toString()}');
+      throw Exception('Failed to fetch comments: ${e.toString()}');
     }
   }
 

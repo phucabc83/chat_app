@@ -1,12 +1,17 @@
 // lib/core/service/socket_service.dart
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:chat_app/features/social/data/models/post_model.dart';
+import 'package:chat_app/features/social/domain/entities/comment.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import 'package:chat_app/core/utils/util.dart';
 import 'package:chat_app/features/auth/domain/entities/user.dart';
-import 'package:chat_app/features/chat/domain/entities/messsage.dart'; // (đúng path của bạn)
+import 'package:chat_app/features/chat/domain/entities/messsage.dart';
+
+import '../../features/social/data/models/comment_model.dart';
+import '../../features/social/domain/entities/post.dart'; // (đúng path của bạn)
 
 typedef ReceiveMessageFun = void Function(Message);
 typedef GetOnlineFriends = void Function(User, bool);
@@ -497,4 +502,36 @@ class SocketService {
       eventCancelCall();
     });
   }
+
+  void listenUpdatePost(Function(Post) onUpdate) {
+    socket.off('feed:new_post');
+    socket.on('feed:new_post', (data) {
+      debugPrint('🟢 [Socket] update post: $data');
+      final post = PostModel.fromJson(data);
+
+      onUpdate(post);
+    });
+
+
+  }
+
+  void listenNewComment(Function(Comment) onNewComment) {
+    socket.off('feed:new_comment');
+    socket.on('feed:new_comment', (data) {
+      debugPrint('🟢 [Socket] new comment: $data');
+      final comment = CommentModel.fromJson(data).toEntity();
+
+      onNewComment(comment);
+    });
+
+  }
+
+  void listenNewLike(Function(Map<String,dynamic>) onUpdate) {
+    socket.off('feed:new_like');
+    socket.on('feed:new_like', (data) {
+      debugPrint('🟢 [Socket] new like: $data');
+      onUpdate(data);
+    });
+  }
+
 }
