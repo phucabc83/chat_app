@@ -53,4 +53,10 @@ class SocialRepositoryImpl implements SocialRepository {
         return comments;
   }
 
+
+  @override
+  Future<List<Post>> fetchUserPosts({required int userId}) {
+      return remoteDataSource.fetchPostUser(userId).then((models) => models.map<Post>((model) => model.toEntity()).toList());
+  }
+
 }

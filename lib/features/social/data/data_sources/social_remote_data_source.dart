@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:chat_app/core/service/api_service.dart';
 import 'package:chat_app/features/social/data/models/comment_model.dart';
 import 'package:chat_app/features/social/domain/entities/comment.dart';
+import 'package:chat_app/features/social/domain/entities/post.dart';
 import '../models/post_model.dart';
 
 class SocialRemoteDataSource {
@@ -54,6 +55,11 @@ class SocialRemoteDataSource {
       print('Error fetching comments: $e');
       rethrow;
     }
+  }
+
+  Future<List<PostModel>> fetchPostUser(int userId) async {
+    final data = await apiService.fetchPostUser(userId);
+    return data;
   }
 }
 

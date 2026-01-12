@@ -763,4 +763,34 @@ class ApiService {
     }
   }
 
+  Future<List<PostModel>> fetchPostUser(int userId) async {
+    String token = await _storage.read(key: 'token') ?? '';
+    final endpoint = '/profiles/$userId/posts';
+    final url = '${dio.options.baseUrl}$endpoint';
+    print('Dio REQUEST → GET $url');
+    try {
+      final res = await dio.get(
+          endpoint,
+          options: Options(
+              headers: {
+                'Authorization': 'Bearer $token'
+              }
+          )
+      );
+
+      print('Dio RESPONSE ← ${res.statusCode} ${res.requestOptions.uri}');
+      print('get data posts for user: ${res.data}');
+      final data = res.data;
+      final list = data as List;
+      final posts = list
+          .map<PostModel>((e) => PostModel.fromJson(e))
+          .toList();
+
+      return posts;
+    }catch(e) {
+      print('Dio ERROR   ← ${e.toString()}');
+      throw Exception('Failed to fetch posts: ${e.toString()}');
+    }
+  }
+
 }

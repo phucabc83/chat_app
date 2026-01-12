@@ -4,6 +4,7 @@ import 'package:chat_app/core/service/image_picker_service.dart';
 import 'package:chat_app/core/service/supabase_storage_service.dart';
 import 'package:chat_app/features/chat/presentation/blocs/image_save_cubit.dart';
 import 'package:chat_app/features/chat/presentation/blocs/out_going_call_cubit.dart';
+import 'package:chat_app/features/social/domain/usecases/fetch_post_user_usecase.dart';
 import 'package:chat_app/features/social/presentation/blocs/comments_action_cubit.dart';
 import 'package:chat_app/features/social/presentation/blocs/create_posts_cubit.dart';
 import 'package:dio/dio.dart';
@@ -189,10 +190,13 @@ Future<void>  setupDI() async {
   sl.registerLazySingleton<CreatePostUseCase>(() => CreatePostUseCase(sl<SocialRepository>()));
   sl.registerLazySingleton<DeletePostUseCase>(() => DeletePostUseCase(sl<SocialRepository>()));
   sl.registerLazySingleton<LikePostUseCase>(() => LikePostUseCase(sl<SocialRepository>()));
+  sl.registerLazySingleton<FetchPostUserUsecase>(() => FetchPostUserUsecase(sl<SocialRepository>()));
   sl.registerFactory<PostsCubit>(() => PostsCubit(
         fetchPostsUseCase: sl<FetchPostsUseCase>(),
         likePostUseCase: sl<LikePostUseCase>(),
+        fetchPostUserUsecase: sl<FetchPostUserUsecase>(),
         socketService: sl<SocketService>(),
+
   ));
 
   sl.registerFactory<CreatePostsCubit>(() => CreatePostsCubit(

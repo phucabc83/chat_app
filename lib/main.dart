@@ -92,8 +92,6 @@ Future<void> main() async {
           BlocProvider<ConversationGroupCubit>(create: (_) => sl<ConversationGroupCubit>()),
           BlocProvider<FriendBloc>(create: (_) => sl<FriendBloc>()),
           BlocProvider<InComingCallCubit>(create: (_) => sl<InComingCallCubit>()),
-          BlocProvider<PostsCubit>(create: (_) => sl<PostsCubit>()),
-
         ],
         child: MaterialApp.router(
           title: 'Chat App',
