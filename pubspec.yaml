@@ -44,8 +44,8 @@ dependencies:
   socket_io_client: ^2.0.0
   equatable:
   get_it:
-  firebase_core:
-  firebase_messaging:
+  firebase_core: ^3.6.0
+  firebase_messaging: ^15.1.0
   flutter_local_notifications:
   android_intent_plus:
   permission_handler:
@@ -62,6 +62,9 @@ dependencies:
   zego_uikit_prebuilt_call: ^4.11.6
   audioplayers:
   emoji_keyboard_flutter:
+  firebase_auth: ^5.3.0
+  google_sign_in: ^6.2.1
+  flutter_facebook_auth: ^6.0.0
 
 
 

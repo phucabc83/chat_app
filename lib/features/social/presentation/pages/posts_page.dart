@@ -47,7 +47,12 @@ class _PostsPageState extends State<PostsPage> {
 
               }
 
-            print('item last ${state.posts.last}');
+            if(state.posts.isEmpty){
+              return Center(
+                child: Text('Không có bài post',style: theme.textTheme.bodyMedium),
+              );
+            }
+
 
 
               return ListView.separated(

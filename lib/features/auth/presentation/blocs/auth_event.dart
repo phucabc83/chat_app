@@ -20,5 +20,7 @@ class AuthSignUpEvent extends AuthEvent {
     required this.avatarId,
   });
 }
+class AuthGoogleSignInEvent extends AuthEvent {}
+class AuthFacebookSignInEvent extends AuthEvent {}
 
 class AuthSignOutEvent extends AuthEvent {}

@@ -52,7 +52,7 @@ class ApiService {
   }
 
   Future<void> signUpWithEmailAndPassword(String email, String password,
-      String name, int avatarId) async {
+      String name, int? avatarId,{String? avatarUrl}) async {
     final endpoint = '/auth/signup';
     final url = '${dio.options.baseUrl}$endpoint';
     print('Dio REQUEST → POST $url');
@@ -61,7 +61,8 @@ class ApiService {
         'email': email,
         'password': password,
         'name': name,
-        'avatarId': avatarId
+        'avatarId': avatarId,
+        'avatarUrl':avatarUrl
       });
       print(res.data);
     } on DioException catch (e) {
@@ -762,5 +763,59 @@ class ApiService {
       throw Exception('Failed to fetch comments: ${e.toString()}');
     }
   }
+
+  Future<List<PostModel>> fetchPostUser(int userId) async {
+    String token = await _storage.read(key: 'token') ?? '';
+    final endpoint = '/profiles/$userId/posts';
+    final url = '${dio.options.baseUrl}$endpoint';
+    print('Dio REQUEST → GET $url');
+    try {
+      final res = await dio.get(
+          endpoint,
+          options: Options(
+              headers: {
+                'Authorization': 'Bearer $token'
+              }
+          )
+      );
+
+      print('Dio RESPONSE ← ${res.statusCode} ${res.requestOptions.uri}');
+      print('get data posts for user: ${res.data}');
+      final data = res.data;
+      final list = data as List;
+      final posts = list
+          .map<PostModel>((e) => PostModel.fromJson(e))
+          .toList();
+
+      return posts;
+    }catch(e) {
+      print('Dio ERROR   ← ${e.toString()}');
+      throw Exception('Failed to fetch posts: ${e.toString()}');
+    }
+  }
+
+  Future<User> fetchUserGoogle({required String email, required String name, required String avatarUrl}) async {
+    final endpoint = '/auth/google';
+    final url = '${dio.options.baseUrl}$endpoint';
+    print('Dio REQUEST → POST $url');
+    try {
+      final res = await dio.post(endpoint, data: {
+        'email': email,
+        'name': name,
+        'avatarUrl':avatarUrl
+      });
+
+      print('Dio RESPONSE ← ${res.statusCode} ${res.requestOptions.uri}');
+
+      return User.fromJson(res.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      final body = e.response?.data;
+      throw Exception('Signup failed (status: $status): $body');
+    }
+
+  }
+
+
 
 }

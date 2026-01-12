@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/post.dart';
+import '../../domain/usecases/fetch_post_user_usecase.dart';
 import '../../domain/usecases/fetch_posts_usecase.dart';
 import '../../domain/usecases/create_post_usecase.dart';
 import '../../domain/usecases/delete_post_usecase.dart';
@@ -18,6 +19,7 @@ class PostsCubit extends Cubit<PostsState> {
   final FetchPostsUseCase fetchPostsUseCase;
   final LikePostUseCase likePostUseCase;
   final SocketService socketService;
+  final FetchPostUserUsecase fetchPostUserUsecase;
 
 
 
@@ -26,12 +28,17 @@ class PostsCubit extends Cubit<PostsState> {
     required this.fetchPostsUseCase,
     required this.likePostUseCase,
     required this.socketService,
+    required this.fetchPostUserUsecase,
   }) : super(const PostsState());
 
   Future<void> loadPosts() async {
     try {
+
       debugPrint('🟢 [PostsCubit] Loading posts...');
       emit(state.copyWith(loading: true, error: null));
+
+
+
       final posts = await fetchPostsUseCase.execute();
       print('data load posts: $posts');
 
@@ -58,6 +65,28 @@ class PostsCubit extends Cubit<PostsState> {
       emit(state.copyWith(loading: false, error: e.toString()));
     }
   }
+
+
+  Future<void> loadPostForUser(int userId) async {
+    try {
+
+      debugPrint('🟢 [PostsCubit] Loading posts user ...');
+      emit(state.copyWith(loading: true, error: null));
+
+
+
+      final posts = await fetchPostUserUsecase.call(userId);
+      print('data load posts user : $posts');
+
+      emit(state.copyWith(loading: false, posts: posts));
+
+    } catch (e) {
+      emit(state.copyWith(loading: false, error: e.toString()));
+    }
+  }
+
+
+
 
   Future<void> likePost(int postId) async {
     try {
