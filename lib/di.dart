@@ -2,8 +2,12 @@ import 'package:chat_app/core/permissions/permission_service.dart';
 import 'package:chat_app/core/service/downloader_service.dart';
 import 'package:chat_app/core/service/image_picker_service.dart';
 import 'package:chat_app/core/service/supabase_storage_service.dart';
+import 'package:chat_app/features/auth/domain/repositories/auth_fb_repository.dart';
 import 'package:chat_app/features/chat/presentation/blocs/image_save_cubit.dart';
 import 'package:chat_app/features/chat/presentation/blocs/out_going_call_cubit.dart';
+import 'package:chat_app/features/chat/presentation/blocs/suggest_model_cubit.dart';
+import 'package:chat_app/features/social/domain/usecases/fetch_post_user_usecase.dart';
+import 'package:chat_app/features/social/presentation/blocs/comments_action_cubit.dart';
 import 'package:chat_app/features/social/presentation/blocs/create_posts_cubit.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
@@ -14,8 +18,12 @@ import 'core/service/api_service.dart';
 import 'core/service/fcm_service.dart';
 import 'core/service/socket_service.dart';
 import 'core/theme/theme_app.dart';
+import 'features/auth/domain/repositories/auth_gg_repository.dart';
 import 'features/chat/presentation/blocs/in_coming_call_cubit.dart';
+import 'features/social/domain/usecases/create_comment_usecase.dart';
+import 'features/social/domain/usecases/fetch_comments_usecase.dart';
 import 'features/social/domain/usecases/like_post_usecase.dart';
+import 'features/social/presentation/blocs/comments_cubit.dart';
 import 'firebase_options.dart';
 
 // ===== Auth =====
@@ -85,7 +93,12 @@ Future<void>  setupDI() async {
   );
   sl.registerLazySingleton<LoginUseCase>(() => LoginUseCase(sl<AuthRepositoryImpl>()));
   sl.registerLazySingleton<SignUpUsecase>(() => SignUpUsecase(sl<AuthRepositoryImpl>()));
-  sl.registerFactory<AuthBloc>(() => AuthBloc(sl<LoginUseCase>(), sl<SignUpUsecase>()));
+  sl.registerLazySingleton<AuthGoogleRepository>(() => AuthGoogleRepository());
+  sl.registerLazySingleton<AuthFacebookRepository>(() => AuthFacebookRepository(
+      sl<ApiService>(),
+  ));
+
+  sl.registerFactory<AuthBloc>(() => AuthBloc(sl<LoginUseCase>(), sl<SignUpUsecase>(),sl<AuthGoogleRepository>(),sl<AuthFacebookRepository>()));
 
   // ----- Conversation -----
   sl.registerLazySingleton<ConversationRemoteDataSource>(
@@ -117,8 +130,12 @@ Future<void>  setupDI() async {
   sl.registerLazySingleton<SupabaseStorageService>(
       () => SupabaseStorageService()
   );
+
+  sl.registerFactory<SuggestModelCubit>(
+        () => SuggestModelCubit()
+  );
   sl.registerFactory<ChatBloc>(() => ChatBloc(sl<LoadMessageUseCase>()
-       ,sl<ImagePickerService>(),sl<SupabaseStorageService>()
+       ,sl<ImagePickerService>(),sl<SupabaseStorageService>(),
   ));
 
   sl.registerLazySingleton<PermissionService>(
@@ -185,19 +202,30 @@ Future<void>  setupDI() async {
   sl.registerLazySingleton<CreatePostUseCase>(() => CreatePostUseCase(sl<SocialRepository>()));
   sl.registerLazySingleton<DeletePostUseCase>(() => DeletePostUseCase(sl<SocialRepository>()));
   sl.registerLazySingleton<LikePostUseCase>(() => LikePostUseCase(sl<SocialRepository>()));
+  sl.registerLazySingleton<FetchPostUserUsecase>(() => FetchPostUserUsecase(sl<SocialRepository>()));
   sl.registerFactory<PostsCubit>(() => PostsCubit(
         fetchPostsUseCase: sl<FetchPostsUseCase>(),
-        createPostUseCase: sl<CreatePostUseCase>(),
-        deletePostUseCase: sl<DeletePostUseCase>(),
-        permissionService: sl<PermissionService>(),
-        imagePickerService: sl<ImagePickerService>(),
         likePostUseCase: sl<LikePostUseCase>(),
+        fetchPostUserUsecase: sl<FetchPostUserUsecase>(),
+        socketService: sl<SocketService>(),
 
   ));
+
   sl.registerFactory<CreatePostsCubit>(() => CreatePostsCubit(
         createPostUseCase: sl<CreatePostUseCase>(),
         permissionService: sl<PermissionService>(),
         imagePickerService: sl<ImagePickerService>(),
+  ));
+
+  sl.registerSingleton<CreateCommentUseCase>(CreateCommentUseCase(sl<SocialRepository>()));
+  sl.registerSingleton<FetchCommentsUsecase>(FetchCommentsUsecase(sl<SocialRepository>()));
+
+  sl.registerFactory<CommentsActionCubit>(() => CommentsActionCubit(
+    sl<CreateCommentUseCase>()
+  ));
+  sl.registerFactory<CommentsCubit>(() => CommentsCubit(
+      sl<FetchCommentsUsecase>(),
+      sl<SocketService>()
   ));
 
   // ----- Friend module -----

@@ -1,12 +1,15 @@
 
 import 'package:chat_app/core/permissions/permission_service.dart';
 import 'package:chat_app/core/service/image_picker_service.dart';
+import 'package:chat_app/core/service/socket_service.dart';
+import 'package:chat_app/features/social/data/models/comment_model.dart';
 import 'package:chat_app/features/social/domain/usecases/like_post_usecase.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/post.dart';
+import '../../domain/usecases/fetch_post_user_usecase.dart';
 import '../../domain/usecases/fetch_posts_usecase.dart';
 import '../../domain/usecases/create_post_usecase.dart';
 import '../../domain/usecases/delete_post_usecase.dart';
@@ -14,69 +17,101 @@ import '../../domain/usecases/delete_post_usecase.dart';
 
 class PostsCubit extends Cubit<PostsState> {
   final FetchPostsUseCase fetchPostsUseCase;
-  final CreatePostUseCase createPostUseCase;
   final LikePostUseCase likePostUseCase;
-  final DeletePostUseCase deletePostUseCase;
-  final PermissionService permissionService;
-  final ImagePickerService imagePickerService;
+  final SocketService socketService;
+  final FetchPostUserUsecase fetchPostUserUsecase;
+
+
 
 
   PostsCubit({
     required this.fetchPostsUseCase,
-    required this.createPostUseCase,
-    required this.deletePostUseCase,
-    required this.permissionService,
-    required this.imagePickerService,
     required this.likePostUseCase,
+    required this.socketService,
+    required this.fetchPostUserUsecase,
   }) : super(const PostsState());
 
   Future<void> loadPosts() async {
     try {
+
       debugPrint('🟢 [PostsCubit] Loading posts...');
       emit(state.copyWith(loading: true, error: null));
+
+
+
       final posts = await fetchPostsUseCase.execute();
       print('data load posts: $posts');
 
-
       emit(state.copyWith(loading: false, posts: posts));
+      socketService.listenUpdatePost(_onPostUpdated);
+      socketService.listenNewLike((data) {
+        final postId = data['postId'];
+        print('data like post: $postId ${postId.runtimeType}');
+        print('data current posts: ${state.posts}');
+        final index = state.posts.indexWhere((post) => int.parse(postId) == post.id);
+        if (index != -1) {
+          print('Post found. Updating like count...');
+           final update = state.posts[index];
+          final updatedPost = update.copyWith(likes: update.likeCount + 1, isLiked: true);
+
+          final updatedPosts = List<Post>.from(state.posts);
+          updatedPosts[index] = updatedPost;
+
+          emit(state.copyWith(posts: updatedPosts));
+        }
+
+      });
     } catch (e) {
       emit(state.copyWith(loading: false, error: e.toString()));
     }
   }
 
+
+  Future<void> loadPostForUser(int userId) async {
+    try {
+
+      debugPrint('🟢 [PostsCubit] Loading posts user ...');
+      emit(state.copyWith(loading: true, error: null));
+
+
+
+      final posts = await fetchPostUserUsecase.call(userId);
+      print('data load posts user : $posts');
+
+      emit(state.copyWith(loading: false, posts: posts));
+
+    } catch (e) {
+      emit(state.copyWith(loading: false, error: e.toString()));
+    }
+  }
+
+
+
+
   Future<void> likePost(int postId) async {
     try {
       await  likePostUseCase.call(postId);
-      final post = state.posts.firstWhere((post) => postId == int.parse(post.id));
-      post.likeCount++;
-      emit(state);
+
 
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }
   }
 
-
-
-  Future<void> removePost(String id) async {
-    try {
-      await deletePostUseCase.execute(id);
-      final updated = state.posts.where((p) => p.id != id).toList();
-      emit(state.copyWith(posts: updated));
-    } catch (e) {
-      emit(state.copyWith(error: e.toString()));
-    }
+  void _onPostUpdated(Post post) {
+    emit(state.copyWith(loading: true));
+    state.posts.insert(0,post);
+    final List<Post> posts = List.from(state.posts);
+    emit(state.copyWith(posts: posts,loading: false));
   }
-  Future<void> chooseImage() async {
-      var granted = await permissionService.requestPhotoPermission();
-      if(!granted){
-        state.copyWith(
-          error: 'Storage permission denied.',
-        );
-      }
-      final imageData = await imagePickerService.pickImage();
 
-  }
+
+
+
+
+
+
+
 }
 class PostsState extends Equatable {
   final bool loading;

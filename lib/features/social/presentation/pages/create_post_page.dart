@@ -26,7 +26,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
       return BlocConsumer<CreatePostsCubit, CreatePostsState>(
         listener: (context, state) {
-          debugPrint('state current ${state.status}');
+          debugPrint('state current ${state.toString()}');
 
           if (state.error != null) {
               showMessageSnackBar(context, '${state.error}');

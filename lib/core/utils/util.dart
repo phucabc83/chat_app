@@ -8,6 +8,7 @@ class Util {
 
 
   static String baseUrl = "http://127.0.0.1:6002";
+
   static String token ='';
   static int userId = 0 ;
   static String userName = '';
@@ -18,8 +19,7 @@ class Util {
   static bool isEmulator = false;
   static int conversationIdActive = 0;
 
-  static String apiBaseUrl() {
-    const port = 6002;
+  static String apiBaseUrl({int port = 6002}) {
 
     if (kIsWeb) return 'http://localhost:$port';
 

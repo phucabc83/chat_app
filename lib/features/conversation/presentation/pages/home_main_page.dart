@@ -3,6 +3,7 @@ import 'package:chat_app/features/chat/presentation/blocs/in_coming_call_cubit.d
 import 'package:chat_app/features/conversation/domain/usecases/fetch_all_user_usecase.dart';
 import 'package:chat_app/features/conversation/presentation/pages/home_page/home_page.dart';
 import 'package:chat_app/features/friend/presentation/pages/friend_list_page.dart';
+import 'package:chat_app/features/profile/presentation/pages/profile.dart';
 import 'package:chat_app/features/social/presentation/pages/posts_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +11,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/service/socket_service.dart';
+import '../../../social/presentation/blocs/posts_cubit.dart';
 import '../../data/data_sources/user_remote_data_source.dart';
 
 import '../../domain/usecases/create_group_usecase.dart';
@@ -45,7 +47,15 @@ class _HomeMainPageState extends State<HomeMainPage> {
       HomePage(),
       GroupPage(),
       FriendListPage(),
-      PostsPage(),
+      BlocProvider(
+          create:(context) => GetIt.instance<PostsCubit>(),
+          child: PostsPage()
+      ),
+      BlocProvider(
+        create: (context) => GetIt.instance<PostsCubit>(),
+        child: ProfilePage()
+      )
+
     ];
     SocketService().connect();
 
@@ -118,6 +128,10 @@ class _HomeMainPageState extends State<HomeMainPage> {
               BottomNavigationBarItem(
                 icon: Icon(Icons.article),
                 label: 'Posts',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'Profile',
               ),
 
             ],

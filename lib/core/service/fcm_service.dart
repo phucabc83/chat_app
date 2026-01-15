@@ -2,6 +2,7 @@
 import 'package:chat_app/core/service/notify_helper.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../../features/friend/friend_injection.dart';
 import 'api_service.dart';
@@ -26,8 +27,8 @@ class FcmService {
     // 2) Lấy token (web cần VAPID)
     String? token;
     if (kIsWeb) {
-      const vapidKey =
-          'BHbqt_u4AGHmA1hego4y2Jgu6watCRq_iF9jHyRdOZcSJY16bqwHbA1lLNAr9ZO2iFHnPMfouwf-hzY7grTghNY';
+      final key = dotenv.env['VAPID_KEY'] ?? '';
+      final vapidKey = key;
       token = await messaging.getToken(vapidKey: vapidKey);
     } else {
       token = await messaging.getToken();
@@ -52,9 +53,11 @@ class FcmService {
 
     // 5) Foreground message (tab/app đang mở)
     FirebaseMessaging.onMessage.listen((RemoteMessage m) {
+
       print('🖱️ Fc Title data: ${m.notification?.title ?? 'No title'}');
 
-      print('   Data: ${m.data}');
+      print('Data: ${m.data}');
+
       NotifyHelper().displayNotification(
         title: m.notification?.title ?? 'No title',
         body: m.notification?.body ?? 'No body',

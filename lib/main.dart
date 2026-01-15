@@ -1,3 +1,4 @@
+import 'package:chat_app/features/chat/presentation/blocs/suggest_model_cubit.dart';
 import 'package:chat_app/features/social/presentation/blocs/posts_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -92,8 +93,7 @@ Future<void> main() async {
           BlocProvider<ConversationGroupCubit>(create: (_) => sl<ConversationGroupCubit>()),
           BlocProvider<FriendBloc>(create: (_) => sl<FriendBloc>()),
           BlocProvider<InComingCallCubit>(create: (_) => sl<InComingCallCubit>()),
-          BlocProvider<PostsCubit>(create: (_) => sl<PostsCubit>()),
-
+          BlocProvider<SuggestModelCubit>(create: (_) => sl<SuggestModelCubit>()),
         ],
         child: MaterialApp.router(
           title: 'Chat App',

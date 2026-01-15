@@ -170,6 +170,10 @@ class RouterApp {
       print('path ${state.matchedLocation}');
       print('isLoggedIn $isLoggedIn isOnLoginPage $isOnLoginPage');
 
+      debugPrint(
+          ' login infor path : ${Util.userId} token ${Util.token}'
+      );
+
       if (!isLoggedIn && !isOnLoginPage) {
         return AppRouteInfor.loginPath;
       }

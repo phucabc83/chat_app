@@ -21,6 +21,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<LoginPage> {
+
   late final _emailTextController;
   late final _passwordTextController;
 
@@ -92,6 +93,37 @@ class _SignInPageState extends State<LoginPage> {
                 },
               ),
               SizedBox(height: paddingCustom(context)),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      context.read<AuthBloc>().add(AuthGoogleSignInEvent());
+                    },
+                    icon: Icon(
+                    Icons.gps_off_outlined,
+                    color: Colors.green,
+                  )
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text('OR', style: theme.textTheme.bodyMedium),
+                  ),
+                  IconButton(
+                    onPressed: (){
+                      context.read<AuthBloc>().add(AuthFacebookSignInEvent());
+                    },
+                    icon: Icon(
+                      Icons.facebook,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: paddingCustom(context)),
+
               BuildPromt(
                 title: 'Sign up',
                 subTitle: 'You don\'t have an account?',

@@ -36,7 +36,7 @@ class User {
       id: json['id'] as int,
       name: json['name'] as String,
       email: json['email'] as String?,
-      token: '',
+      token: json['token'] as String?,
       avatar: json['avatar'] as String?,
       status: json['status'] as String?,
       lastSeen: json['last_seen'] != null

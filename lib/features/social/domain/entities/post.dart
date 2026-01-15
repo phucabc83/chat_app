@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class Post extends Equatable {
-  final String id;
+  final int id;
   final String authorId;
   final String username;
   final String content;
@@ -27,5 +27,25 @@ class Post extends Equatable {
 
   @override
   List<Object?> get props => [id, authorId, content, imageUrl, createdAt,username,avatarUrl,likeCount ,isLiked];
+
+  @override
+  String toString() {
+    return 'Post{id: $id, authorId: $authorId, username: $username, content: $content, imageUrl: $imageUrl, visibility: $visibility, avatarUrl: $avatarUrl, createdAt: $createdAt, likeCount: $likeCount, isLiked: $isLiked}';
+  }
+
+  copyWith({required likes, required bool isLiked}) {
+    return Post(
+      id: id,
+      authorId: authorId,
+      content: content,
+      imageUrl: imageUrl,
+      visibility: visibility,
+      createdAt: createdAt,
+      username: username,
+      avatarUrl: avatarUrl,
+      likeCount: likes,
+      isLiked: isLiked,
+    );
+  }
 }
 
