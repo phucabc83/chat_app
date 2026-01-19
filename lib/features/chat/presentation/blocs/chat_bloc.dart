@@ -94,9 +94,9 @@ class ChatBloc extends Bloc<ChatEvent, StateUI> {
   final SupabaseStorageService supabaseStorageService;
 
   ChatBloc(
-    this.loadMessageUseCase,
-    this.imagePickerService,
-    this.supabaseStorageService,
+    {required this.loadMessageUseCase,
+    required this.imagePickerService,
+    required this.supabaseStorageService}
   ) : super(Initial()) {
     debugPrint('[ChatBloc] constructor');
     on<MarkMessageReadEvent>(_markMessageRead);
@@ -235,6 +235,8 @@ class ChatBloc extends Bloc<ChatEvent, StateUI> {
       _lastHasMore = data.hasMore;
       _lastNextCursor = data.nextCursor;
       print('_lastHasMore: $_lastHasMore, _lastNextCursor: $_lastNextCursor');
+
+
       return data.items;
     } catch (e) {
       return [];

@@ -10,11 +10,7 @@ class SuggestModelCubit extends Cubit<SuggestModelState> {
 
 
   Future<void> fetchSuggestions(String text) async {
-    // emit(state.copyWith(
-    //   isLoading: true,
-    //   isShowSuggestions: false,
-    //   suggestions: [],
-    // ));
+
     debugPrint('🟡 [SuggestModelCubit] Fetching suggestions for text: $text');
 
     if (text.isEmpty) {
@@ -39,11 +35,7 @@ class SuggestModelCubit extends Cubit<SuggestModelState> {
       emit(state.copyWith(
         isLoading: false,
         isShowSuggestions: true,
-        suggestions: [
-          MessageSuggestion(text: 'Xin chào! 👋', similarity: 1.0),
-          MessageSuggestion(text: 'Cảm ơn bạn!', similarity: 1.0),
-          MessageSuggestion(text: 'OK, mình hiểu rồi', similarity: 1.0),
-        ],
+        suggestions: suggestions
       ));
 
     } catch (e) {

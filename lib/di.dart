@@ -75,7 +75,7 @@ import 'package:chat_app/features/social/presentation/blocs/posts_cubit.dart';
 import 'features/friend/friend_injection.dart';
 import 'features/friend/presentation/blocs/friend_bloc.dart';
 
-Future<void>  setupDI() async {
+Future<void> setupDI() async {
   final sl = GetIt.instance;
 
   // ----- Core -----
@@ -86,147 +86,192 @@ Future<void>  setupDI() async {
 
   // ----- Auth -----
   sl.registerLazySingleton<AuthRemoteDataSource>(
-        () => AuthRemoteDataSource(apiService: sl<ApiService>()),
+    () => AuthRemoteDataSource(apiService: sl<ApiService>()),
   );
   sl.registerLazySingleton<AuthRepositoryImpl>(
-        () => AuthRepositoryImpl(remoteDataSource: sl<AuthRemoteDataSource>()),
+    () => AuthRepositoryImpl(remoteDataSource: sl<AuthRemoteDataSource>()),
   );
-  sl.registerLazySingleton<LoginUseCase>(() => LoginUseCase(sl<AuthRepositoryImpl>()));
-  sl.registerLazySingleton<SignUpUsecase>(() => SignUpUsecase(sl<AuthRepositoryImpl>()));
+  sl.registerLazySingleton<LoginUseCase>(
+    () => LoginUseCase(sl<AuthRepositoryImpl>()),
+  );
+  sl.registerLazySingleton<SignUpUsecase>(
+    () => SignUpUsecase(sl<AuthRepositoryImpl>()),
+  );
   sl.registerLazySingleton<AuthGoogleRepository>(() => AuthGoogleRepository());
-  sl.registerLazySingleton<AuthFacebookRepository>(() => AuthFacebookRepository(
-      sl<ApiService>(),
-  ));
+  sl.registerLazySingleton<AuthFacebookRepository>(
+    () => AuthFacebookRepository(sl<ApiService>()),
+  );
 
-  sl.registerFactory<AuthBloc>(() => AuthBloc(sl<LoginUseCase>(), sl<SignUpUsecase>(),sl<AuthGoogleRepository>(),sl<AuthFacebookRepository>()));
+  sl.registerFactory<AuthBloc>(
+    () => AuthBloc(
+      sl<LoginUseCase>(),
+      sl<SignUpUsecase>(),
+      sl<AuthGoogleRepository>(),
+      sl<AuthFacebookRepository>(),
+    ),
+  );
 
   // ----- Conversation -----
   sl.registerLazySingleton<ConversationRemoteDataSource>(
-        () => ConversationRemoteDataSource(apiService: sl<ApiService>()),
+    () => ConversationRemoteDataSource(apiService: sl<ApiService>()),
   );
   sl.registerLazySingleton<ConversationRepositoryImpl>(
-        () => ConversationRepositoryImpl(remoteDataSource: sl<ConversationRemoteDataSource>()),
+    () => ConversationRepositoryImpl(
+      remoteDataSource: sl<ConversationRemoteDataSource>(),
+    ),
   );
   sl.registerLazySingleton<FetchAllConversationUsecase>(
-        () => FetchAllConversationUsecase(sl<ConversationRepositoryImpl>()),
+    () => FetchAllConversationUsecase(sl<ConversationRepositoryImpl>()),
   );
   sl.registerFactory<ConversationBloc>(
-        () => ConversationBloc(sl<FetchAllConversationUsecase>()),
+    () => ConversationBloc(sl<FetchAllConversationUsecase>()),
   );
 
   // ----- Chat -----
   sl.registerLazySingleton<ChatRemoteDataSource>(
-        () => ChatRemoteDataSource(apiService: sl<ApiService>()),
+    () => ChatRemoteDataSource(apiService: sl<ApiService>()),
   );
   sl.registerLazySingleton<ChatRepositoryImpl>(
-        () => ChatRepositoryImpl(remoteDataSource: sl<ChatRemoteDataSource>()),
+    () => ChatRepositoryImpl(remoteDataSource: sl<ChatRemoteDataSource>()),
   );
-  sl.registerLazySingleton<LoadMessageUseCase>(
-        () => LoadMessageUseCase(sl<ChatRepositoryImpl>()),
-  );
-  sl.registerLazySingleton<ImagePickerService>(
-      () => ImagePickerService()
-  );
+
+  sl.registerLazySingleton<ImagePickerService>(() => ImagePickerService());
   sl.registerLazySingleton<SupabaseStorageService>(
-      () => SupabaseStorageService()
+    () => SupabaseStorageService(),
   );
 
-  sl.registerFactory<SuggestModelCubit>(
-        () => SuggestModelCubit()
+  sl.registerFactory<SuggestModelCubit>(() => SuggestModelCubit());
+  sl.registerLazySingleton<LoadMessageUseCase>(
+    () => LoadMessageUseCase(sl<ChatRepositoryImpl>()),
   );
-  sl.registerFactory<ChatBloc>(() => ChatBloc(sl<LoadMessageUseCase>()
-       ,sl<ImagePickerService>(),sl<SupabaseStorageService>(),
-  ));
+  sl.registerFactory<ChatBloc>(
+    () => ChatBloc(
+      loadMessageUseCase: sl<LoadMessageUseCase>(),
+      imagePickerService: sl<ImagePickerService>(),
+      supabaseStorageService: sl<SupabaseStorageService>(),
+    ),
+  );
 
-  sl.registerLazySingleton<PermissionService>(
-      () => PermissionService()
-  );
+  sl.registerLazySingleton<PermissionService>(() => PermissionService());
 
   sl.registerLazySingleton<DownloaderService>(
-          () => DownloaderService(
-            supabase: Supabase.instance.client,
-            bucket: 'avatars'
-          )
+    () => DownloaderService(
+      supabase: Supabase.instance.client,
+      bucket: 'avatars',
+    ),
   );
 
   sl.registerFactory<ImageSaveCubit>(
-          () => ImageSaveCubit(permissionService: sl<PermissionService>(), downloaderService: sl<DownloaderService>())
+    () => ImageSaveCubit(
+      permissionService: sl<PermissionService>(),
+      downloaderService: sl<DownloaderService>(),
+    ),
   );
 
+  sl.registerFactory<OutGoingCallCubit>(
+    () => OutGoingCallCubit(sl<SocketService>()),
+  );
 
-  sl.registerFactory<OutGoingCallCubit>(() => OutGoingCallCubit(sl<SocketService>()
-  ));
-
-  sl.registerFactory<InComingCallCubit>(() => InComingCallCubit(sl<SocketService>()
-  ));
+  sl.registerFactory<InComingCallCubit>(
+    () => InComingCallCubit(sl<SocketService>()),
+  );
 
   // ----- Group -----
   sl.registerLazySingleton<GroupRemoteDataSource>(
-        () => GroupRemoteDataSource(apiService: sl<ApiService>()),
+    () => GroupRemoteDataSource(apiService: sl<ApiService>()),
   );
   sl.registerLazySingleton<GroupRepositoryImpl>(
-        () => GroupRepositoryImpl(remoteDataSource: sl<GroupRemoteDataSource>()),
+    () => GroupRepositoryImpl(remoteDataSource: sl<GroupRemoteDataSource>()),
   );
   sl.registerLazySingleton<CreateGroupUseCase>(
-        () => CreateGroupUseCase(sl<GroupRepositoryImpl>()),
+    () => CreateGroupUseCase(sl<GroupRepositoryImpl>()),
   );
   sl.registerLazySingleton<FetchAllAvatarsUseCase>(
-        () => FetchAllAvatarsUseCase(sl<GroupRepositoryImpl>()),
+    () => FetchAllAvatarsUseCase(sl<GroupRepositoryImpl>()),
   );
   sl.registerLazySingleton<FetchConversationGroupUseCase>(
-        () => FetchConversationGroupUseCase(sl<GroupRepositoryImpl>()),
+    () => FetchConversationGroupUseCase(sl<GroupRepositoryImpl>()),
   );
-  sl.registerFactory<AvatarsCubit>(() => AvatarsCubit(sl<FetchAllAvatarsUseCase>()));
-  sl.registerFactory<CreateGroupCubit>(() => CreateGroupCubit(sl<CreateGroupUseCase>()));
-  sl.registerFactory<ConversationGroupCubit>(() =>
-      ConversationGroupCubit(fetchConversationGroupUseCase: sl<FetchConversationGroupUseCase>()));
+  sl.registerFactory<AvatarsCubit>(
+    () => AvatarsCubit(sl<FetchAllAvatarsUseCase>()),
+  );
+  sl.registerFactory<CreateGroupCubit>(
+    () => CreateGroupCubit(sl<CreateGroupUseCase>()),
+  );
+  sl.registerFactory<ConversationGroupCubit>(
+    () => ConversationGroupCubit(
+      fetchConversationGroupUseCase: sl<FetchConversationGroupUseCase>(),
+    ),
+  );
 
   // ----- Users -----
   sl.registerLazySingleton<UserRemoteDataSource>(
-        () => UserRemoteDataSource(sl<ApiService>()),
+    () => UserRemoteDataSource(sl<ApiService>()),
   );
   sl.registerLazySingleton<UserRepositoryImpl>(
-        () => UserRepositoryImpl(remoteDataSource: sl<UserRemoteDataSource>()),
+    () => UserRepositoryImpl(remoteDataSource: sl<UserRemoteDataSource>()),
   );
   sl.registerLazySingleton<FetchAllUserUseCase>(
-        () => FetchAllUserUseCase(sl<UserRepositoryImpl>()),
+    () => FetchAllUserUseCase(sl<UserRepositoryImpl>()),
   );
-  sl.registerFactory<UsersCubit>(() => UsersCubit(userUseCase: sl<FetchAllUserUseCase>()));
-  sl.registerFactory<UsersOnlineBloc>(() => UsersOnlineBloc(sl<SocketService>()));
+  sl.registerFactory<UsersCubit>(
+    () => UsersCubit(userUseCase: sl<FetchAllUserUseCase>()),
+  );
+  sl.registerFactory<UsersOnlineBloc>(
+    () => UsersOnlineBloc(sl<SocketService>()),
+  );
 
   // ----- Social -----
   final _socialRemote = SocialRemoteDataSource(apiService: sl<ApiService>());
   sl.registerLazySingleton<SocialRemoteDataSource>(() => _socialRemote);
-  sl.registerLazySingleton<SocialRepository>(() => SocialRepositoryImpl(remoteDataSource: _socialRemote));
-  sl.registerLazySingleton<FetchPostsUseCase>(() => FetchPostsUseCase(sl<SocialRepository>()));
-  sl.registerLazySingleton<CreatePostUseCase>(() => CreatePostUseCase(sl<SocialRepository>()));
-  sl.registerLazySingleton<DeletePostUseCase>(() => DeletePostUseCase(sl<SocialRepository>()));
-  sl.registerLazySingleton<LikePostUseCase>(() => LikePostUseCase(sl<SocialRepository>()));
-  sl.registerLazySingleton<FetchPostUserUsecase>(() => FetchPostUserUsecase(sl<SocialRepository>()));
-  sl.registerFactory<PostsCubit>(() => PostsCubit(
-        fetchPostsUseCase: sl<FetchPostsUseCase>(),
-        likePostUseCase: sl<LikePostUseCase>(),
-        fetchPostUserUsecase: sl<FetchPostUserUsecase>(),
-        socketService: sl<SocketService>(),
+  sl.registerLazySingleton<SocialRepository>(
+    () => SocialRepositoryImpl(remoteDataSource: _socialRemote),
+  );
+  sl.registerLazySingleton<FetchPostsUseCase>(
+    () => FetchPostsUseCase(sl<SocialRepository>()),
+  );
+  sl.registerLazySingleton<CreatePostUseCase>(
+    () => CreatePostUseCase(sl<SocialRepository>()),
+  );
+  sl.registerLazySingleton<DeletePostUseCase>(
+    () => DeletePostUseCase(sl<SocialRepository>()),
+  );
+  sl.registerLazySingleton<LikePostUseCase>(
+    () => LikePostUseCase(sl<SocialRepository>()),
+  );
+  sl.registerLazySingleton<FetchPostUserUsecase>(
+    () => FetchPostUserUsecase(sl<SocialRepository>()),
+  );
+  sl.registerFactory<PostsCubit>(
+    () => PostsCubit(
+      fetchPostsUseCase: sl<FetchPostsUseCase>(),
+      likePostUseCase: sl<LikePostUseCase>(),
+      fetchPostUserUsecase: sl<FetchPostUserUsecase>(),
+      socketService: sl<SocketService>(),
+    ),
+  );
 
-  ));
+  sl.registerFactory<CreatePostsCubit>(
+    () => CreatePostsCubit(
+      createPostUseCase: sl<CreatePostUseCase>(),
+      permissionService: sl<PermissionService>(),
+      imagePickerService: sl<ImagePickerService>(),
+    ),
+  );
 
-  sl.registerFactory<CreatePostsCubit>(() => CreatePostsCubit(
-        createPostUseCase: sl<CreatePostUseCase>(),
-        permissionService: sl<PermissionService>(),
-        imagePickerService: sl<ImagePickerService>(),
-  ));
+  sl.registerSingleton<CreateCommentUseCase>(
+    CreateCommentUseCase(sl<SocialRepository>()),
+  );
+  sl.registerSingleton<FetchCommentsUsecase>(
+    FetchCommentsUsecase(sl<SocialRepository>()),
+  );
 
-  sl.registerSingleton<CreateCommentUseCase>(CreateCommentUseCase(sl<SocialRepository>()));
-  sl.registerSingleton<FetchCommentsUsecase>(FetchCommentsUsecase(sl<SocialRepository>()));
-
-  sl.registerFactory<CommentsActionCubit>(() => CommentsActionCubit(
-    sl<CreateCommentUseCase>()
-  ));
-  sl.registerFactory<CommentsCubit>(() => CommentsCubit(
-      sl<FetchCommentsUsecase>(),
-      sl<SocketService>()
-  ));
+  sl.registerFactory<CommentsActionCubit>(
+    () => CommentsActionCubit(sl<CreateCommentUseCase>()),
+  );
+  sl.registerFactory<CommentsCubit>(
+    () => CommentsCubit(sl<FetchCommentsUsecase>(), sl<SocketService>()),
+  );
 
   // ----- Friend module -----
   initFriendDependencies(); // hàm này tự register FriendBloc, repo… vào sl

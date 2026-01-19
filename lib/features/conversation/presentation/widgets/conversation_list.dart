@@ -130,8 +130,29 @@ class _MessageCardState extends State<MessageCard> {
   }
 
   String contentMessage(String content) {
-    if(isUrl(content)) return '🖼️ Ảnh';
-    return content;
+    final parts = splitContent(content);
+
+    for (final part in parts) {
+      if (isImageUrl(part)) return '🖼️ Ảnh';
+      if (isLocation(part)) return '📍 Vị trí';
+    }
+
+    return parts.isNotEmpty ? parts.last : '';
+  }
+  List<String> splitContent(String content) {
+    return content.split('\n').where((e) => e.trim().isNotEmpty).toList();
+  }
+
+  bool isImageUrl(String text) {
+    return text.startsWith('http') &&
+        (text.endsWith('.jpg') ||
+            text.endsWith('.png') ||
+            text.endsWith('.jpeg') ||
+            text.endsWith('.webp'));
+  }
+
+  bool isLocation(String text) {
+    return RegExp(r'^-?\d+(\.\d+)?,-?\d+(\.\d+)?\|').hasMatch(text);
   }
 
   bool isUrl(String s) {

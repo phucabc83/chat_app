@@ -9,6 +9,7 @@ class StateUI {
   int  replyTo;
 
   StateUI({ this.conversationId = 0, this.isGroup = false, this.replyTo = 0});
+
 }
 
 class Initial extends StateUI {}
@@ -18,7 +19,8 @@ class Success<T> extends StateUI {
   final int lastMessageId;
   final DateTime createdAt;
   final bool isLast;
-  Success(this.data,{required this.lastMessageId ,required this.createdAt , this.isLast = false});
+  final Message? lastMessage;
+  Success(this.data,{required this.lastMessageId ,required this.createdAt , this.isLast = false, this.lastMessage});
 
 
   @override
