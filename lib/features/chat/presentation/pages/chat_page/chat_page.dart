@@ -1,37 +1,44 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chat_app/core/consts/const.dart';
 import 'package:chat_app/core/routes/router_app_name.dart';
-import 'package:chat_app/core/service/socket_service.dart';
 import 'package:chat_app/core/theme/theme_app.dart';
 import 'package:chat_app/core/utils/util.dart';
 import 'package:chat_app/features/chat/presentation/blocs/chat_bloc.dart';
 import 'package:chat_app/features/chat/presentation/blocs/suggest_model_cubit.dart';
 import 'package:chat_app/features/chat/presentation/widgets/bottom_sheeet_image.dart';
+import 'package:chat_app/features/chat/presentation/widgets/location_widgets.dart';
+import 'package:chat_app/services/location_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart'
-    show PagedListView, PagedChildBuilderDelegate, PagingListener;
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart' show PagedListView, PagedChildBuilderDelegate, PagingListener, PagingController;
+import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../../core/routes/router_app.dart';
+
+import '../../../../../core/consts/const.dart';
 import '../../../domain/entities/messsage.dart';
+
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+
 import '../../blocs/chat_event.dart';
-import '../../blocs/chat_state.dart';
+
+
+
 
 class RequestMessage {
+  final int conversationId;
   final int? lastMessageId;
   final String? createdAt;
-  final int conversationId;
 
   RequestMessage({
+    required this.conversationId,
     this.lastMessageId,
     this.createdAt,
-    required this.conversationId,
   });
 }
+
 
 class ChatPage extends StatefulWidget {
   final int conversationId;
@@ -59,6 +66,7 @@ class _ChatPageState extends State<ChatPage> {
   late final TextEditingController _controller;
   int replyTo = 0;
   final ScrollController _scrollController = ScrollController();
+  bool isLoadingLocation = false;
 
   late final ChatBloc chatBloc;
   late final int conversationId;
@@ -140,7 +148,7 @@ class _ChatPageState extends State<ChatPage> {
                 onPressed: () {
                   navigateToVideoCallPage(
                     callID:
-                        'call_${widget.conversationId}_${Util.userId}_${chatBloc.state.replyTo.toString()}',
+                    'call_${widget.conversationId}_${Util.userId}_${chatBloc.state.replyTo.toString()}',
                     userIdReceiver: chatBloc.state.replyTo.toString(),
                     userName: Util.userName,
                     conversationId: widget.conversationId,
@@ -175,14 +183,14 @@ class _ChatPageState extends State<ChatPage> {
                           );
                         },
                         firstPageProgressIndicatorBuilder: (context) =>
-                            const Center(child: CircularProgressIndicator()),
+                        const Center(child: CircularProgressIndicator()),
                         newPageProgressIndicatorBuilder: (context) =>
-                            const Center(child: CircularProgressIndicator()),
+                        const Center(child: CircularProgressIndicator()),
                         noItemsFoundIndicatorBuilder: (context) =>
-                            const Center(child: Text('No messages yet')),
+                        const Center(child: Text('No messages yet')),
                       ),
                       separatorBuilder: (context, index) =>
-                          const SizedBox(height: 12),
+                      const SizedBox(height: 12),
                     );
                   },
                 ),
@@ -191,6 +199,7 @@ class _ChatPageState extends State<ChatPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: MessageInputWithSuggestions(
                   controller: _controller,
+                  pagingController: chatBloc.pagingController,
                   onSend: (String text) {
                     if(text.trim().isEmpty) return;
                     _sendMessage(
@@ -212,6 +221,9 @@ class _ChatPageState extends State<ChatPage> {
                       widget.isGroup,
                     );
                   },
+                  onShareCurrentLocation: _handleShareCurrentLocation,
+                  onChooseFromMap: _handleChooseFromMap,
+                  isLoadingLocation: isLoadingLocation,
                 ),
               ),
             ],
@@ -222,13 +234,13 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget buildMessageBubble(
-    ThemeData theme,
-    String message,
-    bool isSender,
-    bool lastMessage,
-    String status,
-    MessageType messageType,
-  ) {
+      ThemeData theme,
+      String message,
+      bool isSender,
+      bool lastMessage,
+      String status,
+      MessageType messageType,
+      ) {
     return Align(
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
       child: Column(
@@ -344,13 +356,13 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _sendMessage(
-    int conversationId,
-    String content,
-    int senderId,
-    MessageType messageType,
-    int? replyTo,
-    bool isGroup,
-  ) {
+      int conversationId,
+      String content,
+      int senderId,
+      MessageType messageType,
+      int? replyTo,
+      bool isGroup,
+      ) {
     if (content.trim().isNotEmpty) {
       context.read<ChatBloc>().add(
         MessageSendEvent(
@@ -362,6 +374,14 @@ class _ChatPageState extends State<ChatPage> {
         ),
       );
     }
+    Message? getLastMessage() {
+      final pages = chatBloc.pagingController.value.pages;
+      if (pages == null || pages.isEmpty) return null;
+      if (pages.first.isEmpty) return null;
+
+      return pages.first.first;
+    }
+
   }
 
   @override
@@ -376,13 +396,13 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _sendImageMessage(
-    int conversationId,
-    String content,
-    int senderId,
-    MessageType messageType,
-    int? replyTo,
-    bool isGroup,
-  ) {
+      int conversationId,
+      String content,
+      int senderId,
+      MessageType messageType,
+      int? replyTo,
+      bool isGroup,
+      ) {
     context.read<ChatBloc>().add(
       SendImageMessage(
         imagePath: '',
@@ -395,11 +415,166 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+  // Location sharing handlers
+  Future<void> _handleShareCurrentLocation() async {
+    setState(() => isLoadingLocation = true);
+
+    try {
+      // Lấy vị trí hiện tại thực tế
+      final position = await LocationService.getCurrentLocation();
+
+      if (position == null) {
+        setState(() => isLoadingLocation = false);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Không thể lấy vị trí. Vui lòng bật GPS và cấp quyền.'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Lấy địa chỉ từ tọa độ
+      final address = await LocationService.getAddressFromCoordinates(
+        position.latitude,
+        position.longitude,
+      ) ?? 'Vị trí hiện tại';
+
+      // Gửi tin nhắn vị trí
+      final locationContent = '${position.latitude},${position.longitude}|$address';
+
+      setState(() => isLoadingLocation = false);
+
+      if (mounted) {
+        Navigator.pop(context); // Đóng bottom sheet
+
+        _sendMessage(
+          conversationId,
+          locationContent,
+          Util.userId,
+          MessageType.location,
+          replyTo,
+          isGroup,
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Đã chia sẻ vị trí hiện tại'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => isLoadingLocation = false);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleChooseFromMap() async {
+    Navigator.pop(context); // Đóng bottom sheet trước
+
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LocationPickerScreen(),
+      ),
+    );
+
+    if (result != null && mounted) {
+      final latitude = result['latitude'] as double;
+      final longitude = result['longitude'] as double;
+      final address = result['address'] as String? ?? 'Vị trí đã chọn';
+
+      // Gửi tin nhắn vị trí
+      final locationContent = '$latitude,$longitude|$address';
+
+      _sendMessage(
+        conversationId,
+        locationContent,
+        Util.userId,
+        MessageType.location,
+        replyTo,
+        isGroup,
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Đã chia sẻ vị trí từ bản đồ'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    }
+  }
+
+  void _openLocationInMap(double lat, double lng) async {
+    try {
+      final url = Uri.parse('https://maps.google.com/?q=$lat,$lng');
+      final urlLauncher = await canLaunchUrl(url);
+
+      if (urlLauncher) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Không thể mở bản đồ'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi mở bản đồ: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   Widget contentMessage(
-    MessageType messageType,
-    String message,
-    ThemeData theme,
-  ) {
+      MessageType messageType,
+      String message,
+      ThemeData theme,
+      ) {
     if (messageType == MessageType.text) {
       return Padding(
         padding: const EdgeInsets.all(10.0),
@@ -424,7 +599,7 @@ class _ChatPageState extends State<ChatPage> {
                   : getWidth(context) * 0.35,
               fit: BoxFit.cover,
               placeholder: (context, url) =>
-                  const Center(child: CircularProgressIndicator()),
+              const Center(child: CircularProgressIndicator()),
               errorWidget: (context, url, error) => Container(
                 color: Colors.grey[300],
                 alignment: Alignment.center,
@@ -447,6 +622,31 @@ class _ChatPageState extends State<ChatPage> {
           ],
         ),
       );
+    } else if (messageType == MessageType.location) {
+      // Parse location message: "latitude,longitude|address"
+      try {
+        final parts = message.split('|');
+        final coords = parts[0].split(',');
+        final latitude = double.parse(coords[0]);
+        final longitude = double.parse(coords[1]);
+        final address = parts.length > 1 ? parts[1] : null;
+
+        return LocationMessageBubble(
+          latitude: latitude,
+          longitude: longitude,
+          address: address,
+          isSender: true, // Will be determined by buildMessageBubble
+          onTap: () => _openLocationInMap(latitude, longitude),
+        );
+      } catch (e) {
+        return Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Text(
+            'Invalid location data',
+            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.red),
+          ),
+        );
+      }
     }
 
     return SizedBox.shrink();
@@ -467,7 +667,7 @@ class _ChatPageState extends State<ChatPage> {
   }) {
     debugPrint(
       'infor navigate to outGoingCallName page: callID=$callID, '
-      'userID=$userIdReceiver, userName=$userName',
+          'userID=$userIdReceiver, userName=$userName',
     );
     context.pushNamed(
       AppRouteInfor.outGoingCallName,
@@ -492,11 +692,11 @@ class SuggestionChips extends StatelessWidget {
   final VoidCallback onDismiss;
 
   const SuggestionChips({
-    Key? key,
+    super.key,
     required this.suggestions,
     required this.onSuggestionTap,
     required this.onDismiss,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -585,13 +785,22 @@ class MessageInputWithSuggestions extends StatefulWidget {
   final TextEditingController controller;
   final Function(String) onSend;
   final VoidCallback onCameraPressed;
+  final VoidCallback onShareCurrentLocation;
+  final VoidCallback onChooseFromMap;
+  final bool isLoadingLocation;
+  final PagingController<RequestMessage?, Message> pagingController;
+
 
   const MessageInputWithSuggestions({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onSend,
     required this.onCameraPressed,
-  }) : super(key: key);
+    required this.onShareCurrentLocation,
+    required this.onChooseFromMap,
+    this.isLoadingLocation = false,
+    required this.pagingController,
+  });
 
   @override
   State<MessageInputWithSuggestions> createState() =>
@@ -629,7 +838,9 @@ class _MessageInputWithSuggestionsState
 
         debugPrint('MessageInputWithSuggestions build: '
             'showSuggestions=$showSuggestions, isLoading=$isLoading, '
-            'suggestions=${suggestions.length}');
+            'suggestions is ${suggestions}');
+
+
        return  Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -666,6 +877,15 @@ class _MessageInputWithSuggestionsState
                     ),
                   ),
 
+                  // Location Button
+                  LocationActionButton(
+                    onShareCurrentLocation: widget.onShareCurrentLocation,
+                    onChooseFromMap: widget.onChooseFromMap,
+                    isLoading: widget.isLoadingLocation,
+                  ),
+
+                  const SizedBox(width: 8),
+
                   // TextField
                   Expanded(
                     child: TextField(
@@ -694,8 +914,14 @@ class _MessageInputWithSuggestionsState
                   if (!showSuggestions)
                     IconButton(
                       onPressed: () {
-                        final inputText = widget.controller.text.trim();
-                        if (inputText.isNotEmpty) {
+                        String inputText ='';
+                        if (widget.pagingController.value.pages != null) {
+                          final lastMessage = widget.pagingController.value.pages!.first.first;
+                          debugPrint('Fetch suggestions based on last message ID: ${lastMessage.id}');
+
+                          if(lastMessage.senderId != Util.userId){
+                            inputText = lastMessage.content;
+                          }
                           context
                               .read<SuggestModelCubit>()
                               .fetchSuggestions(inputText);
@@ -741,8 +967,11 @@ class _MessageInputWithSuggestionsState
   }
 
   _onSuggestionTap(String p1) {
+    context.read<SuggestModelCubit>().clearSuggestions();
+    widget.onSend(p1);
   }
 
   void _onDismiss() {
+    context.read<SuggestModelCubit>().clearSuggestions();
   }
 }

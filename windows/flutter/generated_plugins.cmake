@@ -12,6 +12,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_secure_storage_windows
   flutter_timezone
   flutter_volume_controller
+  geolocator_windows
   permission_handler_windows
   screen_brightness_windows
   share_plus

@@ -65,6 +65,13 @@ dependencies:
   firebase_auth: ^5.3.0
   google_sign_in: ^6.2.1
   flutter_facebook_auth: ^6.0.0
+  geolocator: ^13.0.2
+  geocoding: ^3.0.0
+  url_launcher: ^6.3.0
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.1
+  flutter_map_cancellable_tile_provider:
+
 
 
 
@@ -119,5 +126,3 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-
-

@@ -97,6 +97,10 @@ class MessageModel {
         return MessageType.video;
       case 'file':
         return MessageType.file;
+      case 'audio':
+        return MessageType.audio;
+      case 'location':
+        return MessageType.location;
       default:
         return MessageType.text; // Default to text if unknown type
     }

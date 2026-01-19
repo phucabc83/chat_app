@@ -28,10 +28,9 @@ class SuggestionService {
     );
 
 
-
     try {
       final response = await dio.post(
-        '/suggestions',
+        '/suggest',
         data: {
           'text': query,
         },

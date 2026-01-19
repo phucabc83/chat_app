@@ -18,6 +18,7 @@ enum MessageType {
   video,
   audio,
   file,
+  location,
 }
 
 extension MessageTypeExtension on MessageType {
@@ -33,7 +34,8 @@ extension MessageTypeExtension on MessageType {
         return 'sound';
       case MessageType.file:
         return 'file';
-
+      case MessageType.location:
+        return 'location';
     }
   }
 }
