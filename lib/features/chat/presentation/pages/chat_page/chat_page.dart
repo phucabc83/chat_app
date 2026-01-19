@@ -13,7 +13,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart' show PagedListView, PagedChildBuilderDelegate, PagingListener, PagingController;
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart'
+    show PagedListView, PagedChildBuilderDelegate, PagingListener, PagingController;
 import 'package:url_launcher/url_launcher.dart';
 
 
@@ -23,8 +24,6 @@ import '../../../domain/entities/messsage.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import '../../blocs/chat_event.dart';
-
-
 
 
 class RequestMessage {
@@ -148,7 +147,8 @@ class _ChatPageState extends State<ChatPage> {
                 onPressed: () {
                   navigateToVideoCallPage(
                     callID:
-                    'call_${widget.conversationId}_${Util.userId}_${chatBloc.state.replyTo.toString()}',
+                    'call_${widget.conversationId}_${Util.userId}_${chatBloc
+                        .state.replyTo.toString()}',
                     userIdReceiver: chatBloc.state.replyTo.toString(),
                     userName: Util.userName,
                     conversationId: widget.conversationId,
@@ -174,12 +174,14 @@ class _ChatPageState extends State<ChatPage> {
                           final isLast =
                               item.id == pagingState.pages?.first?.first?.id;
                           return buildMessageBubble(
-                            Theme.of(context),
-                            item.content,
-                            isSender,
-                            isLast,
-                            item.getStatus(isGroup),
-                            item.messageType,
+                              Theme.of(context),
+                              item.content,
+                              isSender,
+                              isLast,
+                              item.getStatus(isGroup),
+                              item.messageType,
+                              widget.isGroup,
+                              item.senderName
                           );
                         },
                         firstPageProgressIndicatorBuilder: (context) =>
@@ -201,7 +203,10 @@ class _ChatPageState extends State<ChatPage> {
                   controller: _controller,
                   pagingController: chatBloc.pagingController,
                   onSend: (String text) {
-                    if(text.trim().isEmpty) return;
+                    debugPrint('Sending message: $text with replyTo: $replyTo');
+                    if (text
+                        .trim()
+                        .isEmpty) return;
                     _sendMessage(
                       widget.conversationId,
                       text,
@@ -233,6 +238,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+
   Widget buildMessageBubble(
       ThemeData theme,
       String message,
@@ -240,38 +246,62 @@ class _ChatPageState extends State<ChatPage> {
       bool lastMessage,
       String status,
       MessageType messageType,
+      bool isGroup,
+      String? senderName,
       ) {
+    final bubbleColor = isSender
+        ? DefaultColors.senderMessage.withOpacity(0.3)
+        : DefaultColors.receiverMessage.withOpacity(0.3);
+
     return Align(
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
       child: Column(
-        crossAxisAlignment: isSender
-            ? CrossAxisAlignment.end
-            : CrossAxisAlignment.start,
+        crossAxisAlignment:
+        isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
+          if (isGroup && !isSender)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4, left: 10),
+              child: Text(
+                senderName?? 'Tai',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
-              color: isSender
-                  ? DefaultColors.senderMessage.withOpacity(0.3)
-                  : DefaultColors.receiverMessage.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(15),
+              color: bubbleColor,
+              borderRadius: BorderRadius.only(
+                topLeft: const Radius.circular(16),
+                topRight: const Radius.circular(16),
+                bottomLeft:
+                isSender ? const Radius.circular(16) : Radius.zero,
+                bottomRight:
+                isSender ? Radius.zero : const Radius.circular(16),
+              ),
             ),
             child: contentMessage(messageType, message, theme),
           ),
 
+          // ✅ Status (sent / delivered / read)
           if (lastMessage &&
               isSender &&
-              messageType !=
-                  MessageType
-                      .video) // Hiển thị replyTo chỉ cho tin nhắn cuối cùng
+              messageType != MessageType.video)
             Padding(
               padding: const EdgeInsets.only(
-                right: 8.0,
-                left: 8.0,
-                bottom: 7.0,
+                right: 12,
+                left: 12,
+                top: 4,
               ),
               child: Text(
                 status,
-                style: TextStyle(fontSize: 12, color: Colors.white70),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.white60,
+                  fontSize: 11,
+                ),
               ),
             ),
         ],
@@ -355,15 +385,16 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  void _sendMessage(
-      int conversationId,
+  void _sendMessage(int conversationId,
       String content,
       int senderId,
       MessageType messageType,
       int? replyTo,
-      bool isGroup,
-      ) {
-    if (content.trim().isNotEmpty) {
+      bool isGroup,) {
+    if (content
+        .trim()
+        .isNotEmpty) {
+      debugPrint('Sending message: $content with replyTo: $replyTo');
       context.read<ChatBloc>().add(
         MessageSendEvent(
           conversationId: conversationId,
@@ -381,7 +412,6 @@ class _ChatPageState extends State<ChatPage> {
 
       return pages.first.first;
     }
-
   }
 
   @override
@@ -395,14 +425,12 @@ class _ChatPageState extends State<ChatPage> {
     super.dispose();
   }
 
-  void _sendImageMessage(
-      int conversationId,
+  void _sendImageMessage(int conversationId,
       String content,
       int senderId,
       MessageType messageType,
       int? replyTo,
-      bool isGroup,
-      ) {
+      bool isGroup,) {
     context.read<ChatBloc>().add(
       SendImageMessage(
         imagePath: '',
@@ -429,7 +457,8 @@ class _ChatPageState extends State<ChatPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Không thể lấy vị trí. Vui lòng bật GPS và cấp quyền.'),
+              content: const Text(
+                  'Không thể lấy vị trí. Vui lòng bật GPS và cấp quyền.'),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
@@ -448,7 +477,8 @@ class _ChatPageState extends State<ChatPage> {
       ) ?? 'Vị trí hiện tại';
 
       // Gửi tin nhắn vị trí
-      final locationContent = '${position.latitude},${position.longitude}|$address';
+      final locationContent = '${position.latitude},${position
+          .longitude}|$address';
 
       setState(() => isLoadingLocation = false);
 
@@ -570,11 +600,9 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  Widget contentMessage(
-      MessageType messageType,
+  Widget contentMessage(MessageType messageType,
       String message,
-      ThemeData theme,
-      ) {
+      ThemeData theme,) {
     if (messageType == MessageType.text) {
       return Padding(
         padding: const EdgeInsets.all(10.0),
@@ -600,11 +628,12 @@ class _ChatPageState extends State<ChatPage> {
               fit: BoxFit.cover,
               placeholder: (context, url) =>
               const Center(child: CircularProgressIndicator()),
-              errorWidget: (context, url, error) => Container(
-                color: Colors.grey[300],
-                alignment: Alignment.center,
-                child: const Icon(Icons.broken_image, color: Colors.grey),
-              ),
+              errorWidget: (context, url, error) =>
+                  Container(
+                    color: Colors.grey[300],
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.broken_image, color: Colors.grey),
+                  ),
             ),
           ),
         ),
@@ -635,7 +664,8 @@ class _ChatPageState extends State<ChatPage> {
           latitude: latitude,
           longitude: longitude,
           address: address,
-          isSender: true, // Will be determined by buildMessageBubble
+          isSender: true,
+          // Will be determined by buildMessageBubble
           onTap: () => _openLocationInMap(latitude, longitude),
         );
       } catch (e) {
@@ -683,11 +713,9 @@ class _ChatPageState extends State<ChatPage> {
 }
 
 
-
-
 // Widget Suggestion Chips
 class SuggestionChips extends StatelessWidget {
-  final List<MessageSuggestion> suggestions;
+  final List<String> suggestions;
   final Function(String) onSuggestionTap;
   final VoidCallback onDismiss;
 
@@ -736,22 +764,22 @@ class SuggestionChips extends StatelessWidget {
           const SizedBox(height: 6),
           suggestions.isEmpty
               ? const Text(
-                  'Không có gợi ý phù hợp',
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
-                )
+            'Không có gợi ý phù hợp',
+            style: TextStyle(color: Colors.white70, fontSize: 14),
+          )
               : SizedBox(
-                  height: 36,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: suggestions.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(width: 8),
-                    itemBuilder: (context, index) {
-                      final suggestion = suggestions[index];
-                      return _buildChip(suggestion.text, onSuggestionTap);
-                    },
-                  ),
-                ),
+            height: 36,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: suggestions.length,
+              separatorBuilder: (context, index) =>
+              const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final suggestion = suggestions[index];
+                return _buildChip(suggestion, onSuggestionTap);
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -822,16 +850,12 @@ class _MessageInputWithSuggestionsState
   }
 
 
-
-
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return BlocBuilder<SuggestModelCubit,SuggestModelState>(
-      builder: (context,state){
-
+    return BlocBuilder<SuggestModelCubit, SuggestModelState>(
+      builder: (context, state) {
         final suggestions = state.suggestions;
         final showSuggestions = state.isShowSuggestions;
         final isLoading = state.isLoading;
@@ -841,13 +865,13 @@ class _MessageInputWithSuggestionsState
             'suggestions is ${suggestions}');
 
 
-       return  Column(
+        return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Suggestion Chips
             AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
-                height:  showSuggestions ? null : 0,
+                height: showSuggestions ? null : 0,
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: SuggestionChips(
@@ -864,7 +888,8 @@ class _MessageInputWithSuggestionsState
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+                border: Border.all(
+                    color: Colors.white.withOpacity(0.2), width: 1),
               ),
               child: Row(
                 children: [
@@ -892,11 +917,12 @@ class _MessageInputWithSuggestionsState
                       controller: widget.controller,
                       textInputAction: TextInputAction.send,
                       onSubmitted: (text) {
-                        if (text.trim().isNotEmpty) {
+                        if (text
+                            .trim()
+                            .isNotEmpty) {
                           widget.onSend(text);
                           widget.controller.clear();
                           context.read<SuggestModelCubit>().clearSuggestions();
-
                         }
                       },
                       style: const TextStyle(color: Colors.white),
@@ -914,12 +940,15 @@ class _MessageInputWithSuggestionsState
                   if (!showSuggestions)
                     IconButton(
                       onPressed: () {
-                        String inputText ='';
+                        String inputText = '';
                         if (widget.pagingController.value.pages != null) {
-                          final lastMessage = widget.pagingController.value.pages!.first.first;
-                          debugPrint('Fetch suggestions based on last message ID: ${lastMessage.id}');
+                          final lastMessage = widget.pagingController.value
+                              .pages!.first.first;
+                          debugPrint(
+                              'Fetch suggestions based on last message ID: ${lastMessage
+                                  .id}');
 
-                          if(lastMessage.senderId != Util.userId){
+                          if (lastMessage.senderId != Util.userId) {
                             inputText = lastMessage.content;
                           }
                           context

@@ -1,3 +1,5 @@
+import 'package:chat_app/core/routes/router_app_name.dart';
+import 'package:chat_app/core/utils/util.dart';
 import 'package:chat_app/core/widgets/choose_avatar.dart';
 import 'package:chat_app/features/auth/domain/entities/user.dart';
 import 'package:chat_app/features/conversation/presentation/blocs/user/users_cubit.dart';
@@ -8,7 +10,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_app/core/consts/const.dart';
 import 'package:chat_app/core/theme/theme_app.dart';
 import 'package:chat_app/features/conversation/domain/entities/avatar.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../../core/widgets/avatar_tile.dart';
+import '../../blocs/conversation/conversation_event.dart';
+import '../../blocs/conversation/conversation_group_cubit.dart';
+import '../../blocs/conversation/conversations_bloc.dart';
 import '../../blocs/group/avatars_cubit.dart';
 import '../../blocs/group/create_group_cubit.dart';
 
@@ -38,6 +44,7 @@ class _AddGroupPageState extends State<AddGroupPage> {
     final gap = SizedBox(height: paddingCustom(context));
 
     return Scaffold(
+      backgroundColor: const Color(0xFF18202D),
       appBar: AppBar(
         backgroundColor: const Color(0xFF18202D),
         title: const Text('Tạo nhóm'),
@@ -49,7 +56,9 @@ class _AddGroupPageState extends State<AddGroupPage> {
         listener: (context, state) {
           if (state.status == CreateStatus.success) {
             showMessageSnackBar(context, state.message ?? 'Thành công');
-            Navigator.pop(context);
+            // context.read<ConversationBloc>().add(AllConversationLoadEvent());
+            context.read<ConversationGroupCubit>().loadConversationGroups();
+            context.goNamed(AppRouteInfor.homeName);
           } else if (state.status == CreateStatus.failure) {
             showMessageSnackBar(context, state.error ?? 'Có lỗi xảy ra');
           }
@@ -175,6 +184,8 @@ class _AddGroupPageState extends State<AddGroupPage> {
       showMessageSnackBar(context, 'Vui lòng chọn ít nhất 1 thành viên');
       return;
     }
+
+
     context.read<CreateGroupCubit>().submit(
       groupName: _groupName.text.trim(),
       groupDescription: _groupDesc.text.trim(),
@@ -205,6 +216,7 @@ class _UsersSheetState extends State<UsersSheet> {
     super.initState();
     // nạp các id đã chọn trước đó
     _selectedIds.addAll(widget.initialSelected.map((e) => e.id));
+
   }
 
   @override
@@ -265,7 +277,7 @@ class _UsersSheetState extends State<UsersSheet> {
                   if (state.error != null && state.error!.isNotEmpty) {
                     return Center(child: Text(state.error!));
                   }
-                  var users = state.users;
+                  var users = List.from(state.users.where((u) => u.id != Util.userId));
                   final q = _searchCtl.text.trim().toLowerCase();
                   if (q.isNotEmpty) {
                     users = users.where((u) =>
@@ -335,10 +347,11 @@ class _UsersSheetState extends State<UsersSheet> {
                     child: ElevatedButton.icon(
                       onPressed: () {
                         final state = context.read<UsersCubit>().state;
-                        final all = state.users;
+                        final allUser = state.users;
+
                         // map id đã chọn -> object User
-                        final result = all.where((u) => _selectedIds.contains(u.id)).toList();
-                        Navigator.pop(context, result);
+                        final selectedUser = allUser.where((u) => _selectedIds.contains(u.id) || u.id == Util.userId).toList();
+                        Navigator.pop(context, selectedUser);
                       },
                       icon: const Icon(Icons.check),
                       label: const Text('Xác nhận'),

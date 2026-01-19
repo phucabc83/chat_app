@@ -6,6 +6,7 @@ import 'package:chat_app/features/chat/presentation/pages/video_call_page/incomi
 import 'package:chat_app/features/chat/presentation/pages/video_call_page/out_going_call_screen.dart';
 import 'package:chat_app/features/chat/presentation/pages/video_call_page/video_call_page.dart';
 import 'package:chat_app/features/conversation/presentation/pages/home_main_page.dart';
+import 'package:chat_app/features/friend/presentation/pages/add_friend_page.dart';
 import 'package:chat_app/features/social/presentation/blocs/create_posts_cubit.dart';
 import 'package:chat_app/features/social/presentation/blocs/posts_cubit.dart';
 import 'package:chat_app/features/social/presentation/pages/create_post_page.dart';
@@ -151,7 +152,12 @@ class RouterApp {
         name: AppRouteInfor.addGroupName,
         builder: (_, _) => const AddGroupPage(),
       ),
-
+      GoRoute(
+        path: AppRouteInfor.addFriendPath,
+        name: AppRouteInfor.addFriendName,
+        builder: (_, _) => const AddFriendPage(),
+      )
+,
       GoRoute(
         path: AppRouteInfor.createPostPath,
         name: AppRouteInfor.createPostName,

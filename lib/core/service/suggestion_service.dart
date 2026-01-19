@@ -16,7 +16,7 @@ class SuggestionService {
 
 
 
-  Future<List<MessageSuggestion>> fetchSuggestions(String query) async {
+  Future<List<String>> fetchSuggestions(String query) async {
     debugPrint('Fetching suggestions for query: $query');
    Dio dio = Dio(
       BaseOptions(
@@ -32,15 +32,16 @@ class SuggestionService {
       final response = await dio.post(
         '/suggest',
         data: {
-          'text': query,
+          'message': query,
         },
       );
 
       debugPrint('Response data: ${response.data}');
 
       final data = response.data['suggestions'] as List<dynamic>;
-      final list = data.map<MessageSuggestion>((item) => MessageSuggestion.fromJson(item)).toList();
-      debugPrint('Fetched ${list.length} suggestions.');
+      final List<String> list =
+      List<String>.from(response.data['suggestions']);
+
       return list;
 
     }  catch (e) {

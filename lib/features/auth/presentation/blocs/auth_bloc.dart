@@ -20,7 +20,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
   final SignUpUsecase signUpUseCase;
   final _storage = const FlutterSecureStorage();
-  final AuthGoogleRepository authGoogleRepository;
+  final AuthGoogleFaceBookRepository authGoogleRepository;
   final AuthFacebookRepository authFacebookRepository;
 
   AuthBloc(this.loginUseCase, this.signUpUseCase, this.authGoogleRepository,this.authFacebookRepository)

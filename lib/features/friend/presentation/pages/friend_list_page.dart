@@ -1,5 +1,7 @@
+import 'package:chat_app/core/routes/router_app_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../blocs/friend_bloc.dart';
 import '../blocs/friend_event.dart';
 import '../blocs/friend_state.dart';
@@ -44,12 +46,7 @@ class _FriendListPageState extends State<FriendListPage>
           IconButton(
             icon: const Icon(Icons.person_add,color: Colors.white),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AddFriendPage(),
-                ),
-              );
+              context.goNamed(AppRouteInfor.addFriendName);
             },
           ),
         ],
@@ -106,7 +103,7 @@ class _FriendListPageState extends State<FriendListPage>
                             ),
                             SizedBox(height: 16),
                             Text(
-                              'No friends yet',
+                              'Bạn chưa có bạn nào',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey,

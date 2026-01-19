@@ -63,7 +63,8 @@ android {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4") // CẬP NHẬT LÊN 2.1.4
-    implementation 'com.facebook.android:facebook-android-sdk:[4,5)'
+    implementation("com.facebook.android:facebook-android-sdk:16.3.0")
+
 }
 
 flutter {

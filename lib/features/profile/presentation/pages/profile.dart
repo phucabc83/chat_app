@@ -3,6 +3,7 @@ import 'package:chat_app/features/friend/friend.dart';
 import 'package:chat_app/features/social/presentation/blocs/posts_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routes/router_app_name.dart';
@@ -28,6 +29,7 @@ class _ProfilePageState extends State<ProfilePage>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     context.read<PostsCubit>().loadPostForUser(Util.userId);
+
   }
 
   @override
@@ -70,6 +72,7 @@ class _ProfilePageState extends State<ProfilePage>
 
 
   Widget _buildProfileCard(BuildContext context) {
+    final userName = Util.userName;
     return Card(
       color: Colors.white.withOpacity(0.15),
       elevation: 8,
@@ -91,7 +94,7 @@ class _ProfilePageState extends State<ProfilePage>
                   top: Radius.circular(16),
                 ),
                 child: Image.network(
-                  'https://picsum.photos/800/300',
+                  Util.avatarUrl ,
                   height: 160,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -119,7 +122,7 @@ class _ProfilePageState extends State<ProfilePage>
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              'John Doe',
+              userName,
               style: Theme
                   .of(context)
                   .textTheme

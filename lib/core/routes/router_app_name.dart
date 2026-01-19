@@ -24,5 +24,9 @@ class AppRouteInfor {
   static const String createPostPath = '/create_post';
   static const String createPostName = 'create_post';
 
+  static const String addFriendPath = '/add_friend';
+  static const String addFriendName = 'add_friend';
+
+
 
 }

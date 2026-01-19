@@ -77,10 +77,6 @@ class ApiService {
 
 
     final endpoint = '/conversations';
-    final url = '${dio.options.baseUrl}$endpoint';
-    print('Dio REQUEST → GET $url');
-    print('Token: $token');
-
     try {
       final res = await dio.get(
           endpoint,

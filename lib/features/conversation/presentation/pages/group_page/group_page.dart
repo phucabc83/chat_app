@@ -17,10 +17,16 @@ class GroupPage extends StatefulWidget {
 }
 
 class _GroupPageState extends State<GroupPage> {
+  late final TextEditingController _searchController;
+
   @override
   void initState() {
+
     super.initState();
+    debugPrint('GroupPage initState called');
+    _searchController = TextEditingController();
     context.read<ConversationGroupCubit>().loadConversationGroups();
+
   }
   @override
   Widget build(BuildContext context) {
@@ -48,13 +54,17 @@ class _GroupPageState extends State<GroupPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               MessageInput(controller: TextEditingController(),
                 hint: 'Search group',
                 prefixIcon: IconButton(
                   onPressed: () {},
                   icon: Icon(Icons.search),
                   color: Colors.white54,
-                )
+                ),
+                onChanged: (value) {
+                  context.read<ConversationGroupCubit>().searchGroup(value);
+                },
               ),
               SizedBox(height: paddingCustom(context),),
               Expanded(
@@ -96,5 +106,10 @@ class _GroupPageState extends State<GroupPage> {
         ),
       ),
     );
+  }
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 }
