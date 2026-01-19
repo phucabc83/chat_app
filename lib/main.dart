@@ -65,9 +65,9 @@ Future<void> main() async {
 
   final session = supabase.auth.currentSession;
   if (session == null) {
-    print("❌ Chưa có session (chưa login).");
+    print(" Chưa có session (chưa login).");
   } else {
-    print("✅ Đã có session, user ID: ${session.user.id}");
+    print(" Đã có session, user ID: ${session.user.id}");
   }
   await sl<FcmService>().setupPush();
   await NotifyHelper().init();

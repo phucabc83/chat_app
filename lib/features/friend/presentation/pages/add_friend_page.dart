@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/routes/router_app_name.dart';
 import '../blocs/friend_bloc.dart';
 import '../blocs/friend_event.dart';
 import '../blocs/friend_state.dart';
@@ -20,7 +22,6 @@ class _AddFriendPageState extends State<AddFriendPage> {
   void initState() {
     super.initState();
     _searchFocusNode.requestFocus();
-
   }
 
   @override
@@ -42,8 +43,17 @@ class _AddFriendPageState extends State<AddFriendPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
+      backgroundColor: const Color(0xFF18202D),
       appBar: AppBar(
-        title: const Text('Add Friend'),
+        leading: GestureDetector(
+          onTap: () {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
+            });          },
+          child: const Icon(Icons.arrow_back, color: Colors.white),
+        ),
         centerTitle: false,
         elevation: 0,
         backgroundColor: const Color(0xFF18202D),
@@ -95,8 +105,13 @@ class _AddFriendPageState extends State<AddFriendPage> {
                 backgroundColor: Colors.green,
               ),
             );
-            Navigator.pop(context);
-          }
+            _searchController.clear();
+            debugPrint('Go back to home page after sending friend request');
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
+            });          }
         },
         builder: (context, state) {
           if (state is FriendLoading) {
@@ -116,7 +131,7 @@ class _AddFriendPageState extends State<AddFriendPage> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Search for users to add as friends',
+                      'Tìm kiếm bạn bè bằng tên của họ',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.grey,

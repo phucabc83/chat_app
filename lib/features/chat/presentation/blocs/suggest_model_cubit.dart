@@ -18,9 +18,9 @@ class SuggestModelCubit extends Cubit<SuggestModelState> {
         isLoading: false,
         isShowSuggestions: true,
         suggestions: [
-          MessageSuggestion(text: 'Xin chào! 👋', similarity: 1.0),
-          MessageSuggestion(text: 'Cảm ơn bạn!', similarity: 1.0),
-          MessageSuggestion(text: 'OK, mình hiểu rồi', similarity: 1.0),
+           'Xin chào! 👋',
+          'Cảm ơn bạn!',
+          'OK, mình hiểu rồi',
         ],
       ));
       return;
@@ -29,13 +29,13 @@ class SuggestModelCubit extends Cubit<SuggestModelState> {
     try {
       final suggestions = await _suggestionService.fetchSuggestions(text);
 
-      debugPrint('🟢 [SuggestModelCubit] Fetched suggestions: $suggestions');
+      debugPrint(' [SuggestModelCubit] Fetched suggestions: $suggestions');
 
 
       emit(state.copyWith(
         isLoading: false,
         isShowSuggestions: true,
-        suggestions: suggestions
+        suggestions: suggestions,
       ));
 
     } catch (e) {
@@ -62,7 +62,7 @@ class SuggestModelState  {
   bool isLoading;
   bool isShowSuggestions;
   String errorMessage = '';
-  List<MessageSuggestion> suggestions;
+  List<String> suggestions;
 
   SuggestModelState({
     this.isLoading = false,
@@ -74,14 +74,14 @@ class SuggestModelState  {
   SuggestModelState copyWith({
     bool? isLoading,
     bool? isShowSuggestions,
-    List<MessageSuggestion>? suggestions,
+    List<String>? suggestions,
     String? errorMessage,
   }) {
     return SuggestModelState(
       isLoading: isLoading ?? this.isLoading,
       isShowSuggestions: isShowSuggestions ?? this.isShowSuggestions,
       suggestions: suggestions != null
-          ? List<MessageSuggestion>.from(suggestions)
+          ? List<String>.from(suggestions)
           : this.suggestions,
       errorMessage: errorMessage ?? this.errorMessage,
     );
@@ -90,14 +90,14 @@ class SuggestModelState  {
 
 class MessageSuggestion  {
   final String text;
-  final double similarity;
 
-  const MessageSuggestion({required this.text, required this.similarity});
+
+  const MessageSuggestion({required this.text});
 
   static fromJson(item) {
     return MessageSuggestion(
       text: item['text'],
-      similarity: item['similarity'].toDouble(),
+
     );
   }
 }

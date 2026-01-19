@@ -20,6 +20,7 @@ extension PagingControllerChatOps
     on PagingController<RequestMessage?, Message> {
   /// Thêm message mới lên đầu trang đầu tiên (optimistic insert)
   void prependMessage(Message m) {
+    debugPrint('[PagingControllerChatOps] prependMessage: ${m.id}');
     final s = value;
     final pages = (s.pages ?? const []).map<List<Message>>((p) => List<Message>.from(p.cast<Message>())).toList();
     if (pages.isEmpty) {
@@ -123,6 +124,8 @@ class ChatBloc extends Bloc<ChatEvent, StateUI> {
     MessageSendEvent event,
     Emitter<StateUI> emit,
   ) async {
+    debugPrint('[ChatBloc] _sendMessage');
+    debugPrint('conversationId: ${state.conversationId}');
     if (state.conversationId == 0) return;
     try {
       final message = await socketService.sendMessage(
@@ -134,6 +137,8 @@ class ChatBloc extends Bloc<ChatEvent, StateUI> {
         replyTo: event.replyTo,
         isGroup: event.isGroup,
       );
+
+      debugPrint('Sent message ID: ${message.id}');
 
       messages.add(message);
       pagingController.prependMessage(message);

@@ -97,7 +97,7 @@ Future<void> setupDI() async {
   sl.registerLazySingleton<SignUpUsecase>(
     () => SignUpUsecase(sl<AuthRepositoryImpl>()),
   );
-  sl.registerLazySingleton<AuthGoogleRepository>(() => AuthGoogleRepository());
+  sl.registerLazySingleton<AuthGoogleFaceBookRepository>(() => AuthGoogleFaceBookRepository());
   sl.registerLazySingleton<AuthFacebookRepository>(
     () => AuthFacebookRepository(sl<ApiService>()),
   );
@@ -106,7 +106,7 @@ Future<void> setupDI() async {
     () => AuthBloc(
       sl<LoginUseCase>(),
       sl<SignUpUsecase>(),
-      sl<AuthGoogleRepository>(),
+      sl<AuthGoogleFaceBookRepository>(),
       sl<AuthFacebookRepository>(),
     ),
   );

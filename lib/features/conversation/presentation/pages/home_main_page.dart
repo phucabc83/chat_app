@@ -41,6 +41,7 @@ class _HomeMainPageState extends State<HomeMainPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    debugPrint('🏠 HomeMainPage initState');
 
 
     pages = [
@@ -58,7 +59,6 @@ class _HomeMainPageState extends State<HomeMainPage> {
 
     ];
     SocketService().connect();
-
     context.read<InComingCallCubit>().init();
   }
 
@@ -98,10 +98,7 @@ class _HomeMainPageState extends State<HomeMainPage> {
               ),
               Padding(
               padding: const EdgeInsets.only(bottom: 10.0), // Khoảng cách dưới cùng
-              child: IndexedStack(
-                index: _currentIndex,
-                children: pages,
-              ),
+              child: pages[_currentIndex],
             )
             ],
           ),

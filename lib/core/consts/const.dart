@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 double getWidth(context) => MediaQuery.of(context).size.width;
 double getHeight(context) => MediaQuery.of(context).size.height;
 double paddingCustom(context) => getWidth(context) * 0.05;
