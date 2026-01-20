@@ -76,7 +76,6 @@ class ConversationBloc extends Bloc<ConversationEvent, ConversationState>{
       conversation.lastMessage = message.content;
       conversation.lastMessageTime = message.sentAt;
 
-      debugPrint('✅ Received message in conversation ${message}');
       if(message.senderId != Util.userId  && message.readCount < message.totalRecipients &&
           message.deliveredCount < message.totalRecipients ) {
         conversation.unreadCount += 1;

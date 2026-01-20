@@ -29,12 +29,14 @@ class ConversationGroupCubit extends Cubit<ConversationGroupState> {
         ..clear()
         ..addAll(data);
 
-      socketService.conversationReceiveMessage(_receiveMessage, true);
 
       emit(state.copyWith(
         loading: false,
         conversations: List.from(_allConversations),
       ));
+
+      socketService.conversationReceiveMessage(_receiveMessage, true);
+
     } catch (e) {
       emit(state.copyWith(
         loading: false,
@@ -69,11 +71,15 @@ class ConversationGroupCubit extends Cubit<ConversationGroupState> {
 
 
   void _receiveMessage(Message m) {
+
+    // Lấy ra id cuộc hội thoại của message
+
     final idx = _allConversations.indexWhere(
           (c) => c.conversationId == m.conversationId,
     );
 
     if (idx != -1) {
+      // cập nhật lại tin nhắn mới nhất
       final updatedConv = _allConversations[idx].copyWith(
         lastMessage: m.content,
         lastMessageTime: m.sentAt,
@@ -88,6 +94,7 @@ class ConversationGroupCubit extends Cubit<ConversationGroupState> {
           conversations: List.from(_allConversations),
         ));
       }
+
     }
   }
 

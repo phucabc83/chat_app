@@ -4,6 +4,7 @@ import 'package:chat_app/features/auth/presentation/blocs/auth_event.dart';
 import 'package:chat_app/features/auth/presentation/widgets/build_promt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/consts/const.dart';
@@ -102,31 +103,20 @@ class _SignInPageState extends State<LoginPage> {
                       context.read<AuthBloc>().add(AuthGoogleSignInEvent());
                     },
                     icon: Icon(
-                    Icons.gps_off_outlined,
-                    color: Colors.green,
+                      FontAwesomeIcons.google,
+                      size: 40,
+                      color: Colors.green,
                   )
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('OR', style: theme.textTheme.bodyMedium),
-                  ),
-                  IconButton(
-                    onPressed: (){
-                      context.read<AuthBloc>().add(AuthFacebookSignInEvent());
-                    },
-                    icon: Icon(
-                      Icons.facebook,
-                      color: Colors.blue,
-                    ),
-                  ),
+
                 ],
               ),
 
               SizedBox(height: paddingCustom(context)),
 
               BuildPromt(
-                title: 'Sign up',
-                subTitle: 'You don\'t have an account?',
+                title: 'Đăng ký',
+                subTitle: 'Ban chưa có tài khoản ?',
                 onTap: () => context.goNamed(AppRouteInfor.signUpName),
               ),
             ],

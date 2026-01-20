@@ -157,6 +157,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                                     .bodyMedium?.copyWith(color: Colors.white),
                                 )
                             ),
+
                             TextButton.icon(
                                 onPressed: () {},
                                 icon: Icon(Icons.supervised_user_circle_outlined,

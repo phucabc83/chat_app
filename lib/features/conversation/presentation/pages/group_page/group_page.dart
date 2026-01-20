@@ -58,7 +58,9 @@ class _GroupPageState extends State<GroupPage> {
               MessageInput(controller: TextEditingController(),
                 hint: 'Search group',
                 prefixIcon: IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+
+                  },
                   icon: Icon(Icons.search),
                   color: Colors.white54,
                 ),
@@ -80,6 +82,7 @@ class _GroupPageState extends State<GroupPage> {
                   child: BlocBuilder<ConversationGroupCubit, ConversationGroupState>(
 
                     builder: (context,state){
+
                       if(state.loading){
                         return Center(child: CircularProgressIndicator(color: DefaultColors.messageListPage));
                       }

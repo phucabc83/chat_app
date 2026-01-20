@@ -41,8 +41,7 @@ class _OutGoingCallScreenState extends State<OutGoingCallScreen> {
     return BlocListener<OutGoingCallCubit,OutGoingCallState>(
 
       listener: (BuildContext context, state) {
-        debugPrint("✅ state outgoing ${state.status}");
-
+        debugPrint(" state outgoing ${state.status}");
         if(state.status == OutGoingCallStatus.cancel){
         Navigator.of(context).pop();
       }

@@ -44,6 +44,7 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
+            isShrinkResources = true
             signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -51,8 +52,17 @@ android {
             )
         }
         getByName("debug") {
+            isMinifyEnabled = false
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+
+    // Packaging options để tránh xung đột native libs
+    packagingOptions {
+        pickFirst("lib/armeabi-v7a/libc++_shared.so")
+        pickFirst("lib/arm64-v8a/libc++_shared.so")
+        pickFirst("lib/x86/libc++_shared.so")
+        pickFirst("lib/x86_64/libc++_shared.so")
     }
 
     // Cấu hình Java toolchain
