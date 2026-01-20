@@ -34,6 +34,7 @@ class _AddGroupPageState extends State<AddGroupPage> {
 
   @override
   void initState() {
+
     super.initState();
     context.read<AvatarsCubit>().load();
     context.read<UsersCubit>().loadAllUsers();
@@ -348,7 +349,6 @@ class _UsersSheetState extends State<UsersSheet> {
                       onPressed: () {
                         final state = context.read<UsersCubit>().state;
                         final allUser = state.users;
-
                         // map id đã chọn -> object User
                         final selectedUser = allUser.where((u) => _selectedIds.contains(u.id) || u.id == Util.userId).toList();
                         Navigator.pop(context, selectedUser);

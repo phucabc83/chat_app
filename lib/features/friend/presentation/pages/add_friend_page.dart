@@ -47,11 +47,8 @@ class _AddFriendPageState extends State<AddFriendPage> {
       appBar: AppBar(
         leading: GestureDetector(
           onTap: () {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (Navigator.canPop(context)) {
-                Navigator.pop(context);
-              }
-            });          },
+            Navigator.pop(context);
+              },
           child: const Icon(Icons.arrow_back, color: Colors.white),
         ),
         centerTitle: false,

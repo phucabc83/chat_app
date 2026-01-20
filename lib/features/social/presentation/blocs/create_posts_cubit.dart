@@ -74,7 +74,7 @@ class CreatePostsCubit extends Cubit<CreatePostsState> {
 
 
       debugPrint(
-        '🟢 [CreatePostsCubit] Image picked: Path=${imageData['filePath']}, Size=${(imageData['fileBytes'] as Uint8List).lengthInBytes} bytes',
+        '[CreatePostsCubit] Image picked: Path=${imageData['filePath']}, Size=${(imageData['fileBytes'] as Uint8List).lengthInBytes} bytes',
       );
 
       emit(
@@ -85,10 +85,6 @@ class CreatePostsCubit extends Cubit<CreatePostsState> {
             mimeType: out.mimeType
           )
       );
-
-
-
-
   }
 }
 

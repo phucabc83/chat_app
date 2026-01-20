@@ -69,7 +69,7 @@ Future<void> main() async {
   } else {
     print(" Đã có session, user ID: ${session.user.id}");
   }
-  await sl<FcmService>().setupPush();
+  // await sl<FcmService>().setupPush();
   await NotifyHelper().init();
   final socketService = sl<SocketService>();
 

@@ -92,12 +92,10 @@ class SocketService {
     });
   }
 
-  /// Đăng xuất chủ động
   void logoutAndDisconnect() {
     if (!socket.connected) return;
     socket.emit('friendOffline');
     socket.disconnect();
-    print('🔌 [Socket] Disconnected manually');
   }
 
   /// Đóng socket tạm thời (không gửi friendOffline)
@@ -226,23 +224,18 @@ class SocketService {
     socket.off(eventName);
   }
 
-  /// ==========================
-  /// NHẬN TIN Ở MÀN DANH SÁCH CONVERSATION
-  /// ==========================
   void conversationReceiveMessage(ReceiveMessageFun onReceive, bool isGroup) {
     final eventName = isGroup
         ? 'conversationUpdated_group'
         : 'conversationUpdated_private';
 
-    // tránh đăng ký trùng
     socket.off(eventName);
 
     socket.on(eventName, (data) {
-      print('📥 [Socket] Conversation update message: $data');
+      print('[Socket] Conversation update message: $data');
       final message = Message.fromJson(data);
       onReceive(message);
 
-      // Ở list thì chỉ delivered (không read)
       if (_shouldAckOnce(message.id) && message.senderId != Util.userId) {
         onMessageDelivered(message.id!, message.conversationId);
       }
@@ -427,6 +420,7 @@ class SocketService {
       debugPrint('[Socket] Call accepted: $data');
       onCallAccepted(data);
     });
+
   }
 
   acceptCall(String s, int i,int conversationId) {

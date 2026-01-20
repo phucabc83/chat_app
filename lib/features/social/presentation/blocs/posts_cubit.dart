@@ -37,14 +37,13 @@ class PostsCubit extends Cubit<PostsState> {
       debugPrint('🟢 [PostsCubit] Loading posts...');
       emit(state.copyWith(loading: true, error: null));
 
-
-
       final posts = await fetchPostsUseCase.execute();
       print('data load posts: $posts');
 
       emit(state.copyWith(loading: false, posts: posts));
       socketService.listenUpdatePost(_onPostUpdated);
       socketService.listenNewLike((data) {
+
         final postId = data['postId'];
         print('data like post: $postId ${postId.runtimeType}');
         print('data current posts: ${state.posts}');

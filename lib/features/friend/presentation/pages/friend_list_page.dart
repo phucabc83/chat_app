@@ -46,7 +46,7 @@ class _FriendListPageState extends State<FriendListPage>
           IconButton(
             icon: const Icon(Icons.person_add,color: Colors.white),
             onPressed: () {
-              context.goNamed(AppRouteInfor.addFriendName);
+              context.push(AppRouteInfor.addFriendPath);
             },
           ),
         ],

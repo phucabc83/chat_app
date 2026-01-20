@@ -13,6 +13,7 @@ class SocialRepositoryImpl implements SocialRepository {
 
   SocialRepositoryImpl({required this.remoteDataSource});
 
+
   @override
   Future<List<Post>> fetchPosts() async {
     final models = await remoteDataSource.fetchPosts();
